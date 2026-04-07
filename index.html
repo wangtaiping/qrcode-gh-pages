@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>动态二维码管理平台</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --primary: #4a6cf7;
@@ -822,19 +822,98 @@ function genId() {
   return 'xxxxxxxxxxxx'.replace(/x/g, () => ((Math.random()*16)|0).toString(16));
 }
 
-// ==================== QR Generation (browser-side) ====================
+// ==================== QR Generation (browser-side, using qrcodejs) ====================
 function generateQR(canvasId, text) {
   return new Promise((resolve, reject) => {
     const canvas = document.getElementById(canvasId);
-    QRCode.toCanvas(canvas, text, { width: 300, errorCorrectionLevel: 'H', margin: 1 }, (err) => {
-      if (err) reject(err);
-      else resolve(canvas);
+    // 清除之前的内容（qrcodejs 会在容器内创建子元素）
+    canvas.style.display = 'none';
+    const wrapper = canvas.parentElement;
+    const oldQr = wrapper.querySelector('.qrcodejs-container');
+    if (oldQr) oldQr.remove();
+
+    // 创建临时容器给 qrcodejs 用
+    const tempDiv = document.createElement('div');
+    tempDiv.className = 'qrcodejs-container';
+    tempDiv.style.display = 'none';
+    wrapper.insertBefore(tempDiv, canvas);
+
+    new QRCode(tempDiv, {
+      text: text,
+      width: 300,
+      height: 300,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
     });
+
+    // 等待 qrcodejs 渲染完成
+    setTimeout(() => {
+      const img = tempDiv.querySelector('img');
+      const cvs = tempDiv.querySelector('canvas');
+      if (cvs) {
+        // 把 qrcodejs 生成的 canvas 内容画到我们的目标 canvas
+        const ctx = canvas.getContext('2d');
+        canvas.width = cvs.width;
+        canvas.height = cvs.height;
+        ctx.drawImage(cvs, 0, 0);
+        canvas.style.display = '';
+        resolve(canvas);
+      } else if (img) {
+        // qrcodejs 有时生成 img 而不是 canvas
+        const ctx = canvas.getContext('2d');
+        const image = new Image();
+        image.onload = () => {
+          canvas.width = image.width;
+          canvas.height = image.height;
+          ctx.drawImage(image, 0, 0);
+          canvas.style.display = '';
+          resolve(canvas);
+        };
+        image.onerror = () => reject(new Error('Failed to load QR image'));
+        image.src = img.src;
+      } else {
+        reject(new Error('QRCode generation failed'));
+      }
+    }, 200);
   });
 }
 
 function generateQRDataURL(text) {
-  return QRCode.toDataURL(text, { width: 300, errorCorrectionLevel: 'H', margin: 1 });
+  return new Promise((resolve, reject) => {
+    // 创建临时 canvas
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 300;
+    tempCanvas.height = 300;
+    const tempDiv = document.createElement('div');
+    tempDiv.style.position = 'fixed';
+    tempDiv.style.left = '-9999px';
+    document.body.appendChild(tempDiv);
+
+    new QRCode(tempDiv, {
+      text: text,
+      width: 300,
+      height: 300,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    setTimeout(() => {
+      const cvs = tempDiv.querySelector('canvas');
+      const img = tempDiv.querySelector('img');
+      if (cvs) {
+        document.body.removeChild(tempDiv);
+        resolve(cvs.toDataURL('image/png'));
+      } else if (img) {
+        document.body.removeChild(tempDiv);
+        resolve(img.src);
+      } else {
+        document.body.removeChild(tempDiv);
+        reject(new Error('QRCode generation failed'));
+      }
+    }, 200);
+  });
 }
 
 // ==================== Toast ====================
