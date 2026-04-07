@@ -701,7 +701,7 @@
 
   <!-- Data note -->
   <div class="data-note">
-    <strong>数据存储说明：</strong>二维码数据按用户隔离保存在浏览器本地，清除浏览器数据会导致丢失。建议定期导出备份。
+    <strong>云端数据存储：</strong>用户账号和二维码数据已保存到云端（GitHub），换浏览器/设备登录同一账号即可同步数据。
     <span id="exportBtn" style="float:right;cursor:pointer;color:#4a6cf7;font-weight:700" onclick="exportData()">导出数据</span>
     <span id="importBtn" style="float:right;cursor:pointer;color:#7c3aed;font-weight:700;margin-right:16px" onclick="document.getElementById('importFile').click()">导入数据</span>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
@@ -922,11 +922,17 @@
 // ==================== Constants ====================
 const SITE_URL = 'https://lattafar.com';
 const STORAGE_KEY = 'qrcode_app_data';
-const USERS_KEY = 'qrcode_app_users';  // 用户账号数据库
+const USERS_KEY = 'qrcode_app_users';  // 本地用户缓存
 const SESSION_KEY = 'qrcode_app_session';  // 当前登录会话
-// 远程数据读取地址（公开，无需 token）
-const GITHUB_RAW = 'https://raw.githubusercontent.com/wangtaiping/qrcode-gh-pages/main/data/qrcodes.json';
-const GITHUB_API_URL = 'https://api.github.com/repos/wangtaiping/qrcode-gh-pages/contents/data/qrcodes.json';
+const GITHUB_REPO = 'wangtaiping/qrcode-gh-pages';
+const GITHUB_BRANCH = 'main';
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/' + GITHUB_BRANCH + '/data';
+const GITHUB_API_BASE = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/data';
+// CORS 代理列表
+const CORS_PROXIES = [
+  url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)
+];
 
 // ==================== State ====================
 const seqUrls = [];
@@ -935,9 +941,88 @@ let editingId = null;
 let editUrls = [];
 let remoteDB = null;
 let currentUser = null;  // 当前登录用户名
+let cachedUsers = null;  // 缓存远程用户列表
 
-// ==================== Auth System (pure frontend) ====================
-// 简单的哈希函数（用于密码存储，非安全级别但够用）
+// ==================== GitHub API Helpers ====================
+// 通过 CORS 代理请求 GitHub API
+async function githubFetch(url, options = {}) {
+  for (const proxyFn of CORS_PROXIES) {
+    try {
+      const proxyUrl = proxyFn(url);
+      const res = await fetch(proxyUrl, options);
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.log('CORS proxy failed:', e.message);
+    }
+  }
+  // 直接尝试（同源时可用）
+  try {
+    const res = await fetch(url, options);
+    if (res.ok) return await res.json();
+  } catch {}
+  return null;
+}
+
+// 获取 GitHub 文件内容
+async function githubGetFile(path) {
+  const url = GITHUB_RAW_BASE + '/' + path + '?t=' + Date.now();
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      const text = await res.text();
+      return JSON.parse(text);
+    }
+  } catch {}
+  return null;
+}
+
+// 保存文件到 GitHub
+async function githubSaveFile(path, content, message) {
+  const apiUrl = GITHUB_API_BASE + '/' + path;
+  const jsonStr = JSON.stringify(content, null, 2);
+  const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
+
+  // 先获取当前 SHA
+  let sha = null;
+  for (const proxyFn of CORS_PROXIES) {
+    try {
+      const proxyUrl = proxyFn(apiUrl);
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.sha) { sha = data.sha; break; }
+      }
+    } catch {}
+  }
+
+  const body = {
+    message: message || 'update: ' + path + ' ' + new Date().toISOString().slice(0,16),
+    content: base64Content,
+    branch: GITHUB_BRANCH
+  };
+  if (sha) body.sha = sha;
+
+  for (const proxyFn of CORS_PROXIES) {
+    try {
+      const proxyUrl = proxyFn(apiUrl);
+      const res = await fetch(proxyUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        const result = await res.json();
+        return result;
+      }
+    } catch (e) {
+      console.log('Save proxy failed:', e.message);
+    }
+  }
+  return null;
+}
+
+// ==================== Auth System (GitHub-backed) ====================
+// 简单的哈希函数（用于密码存储）
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -948,15 +1033,33 @@ function simpleHash(str) {
   return 'h_' + Math.abs(hash).toString(36);
 }
 
-function getUsers() {
+// 从 GitHub 加载用户列表
+async function loadUsersFromRemote() {
+  if (cachedUsers) return cachedUsers;
+  const data = await githubGetFile('users.json');
+  if (data && typeof data === 'object') {
+    cachedUsers = data;
+    // 缓存到本地
+    localStorage.setItem(USERS_KEY, JSON.stringify(data));
+    return data;
+  }
+  // 本地缓存
   try {
     const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch { return {}; }
+    if (raw) {
+      cachedUsers = JSON.parse(raw);
+      return cachedUsers;
+    }
+  } catch {}
+  return {};
 }
 
-function saveUsers(users) {
+// 保存用户列表到 GitHub
+async function saveUsersToRemote(users) {
+  cachedUsers = users;
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  const result = await githubSaveFile('users.json', users, 'update: user registry ' + new Date().toISOString().slice(0,16));
+  return !!result;
 }
 
 function doRegister() {
@@ -970,15 +1073,30 @@ function doRegister() {
   if (password.length < 4) { errEl.textContent = '密码至少4位'; return; }
   if (password !== password2) { errEl.textContent = '两次密码不一致'; return; }
 
-  const users = getUsers();
-  if (users[username]) { errEl.textContent = '用户名已存在'; return; }
+  // 异步注册（需要网络请求）
+  errEl.textContent = '注册中...';
+  (async () => {
+    try {
+      const users = await loadUsersFromRemote();
+      if (users[username]) { errEl.textContent = '用户名已存在'; return; }
 
-  users[username] = { passwordHash: simpleHash(password), createdAt: Date.now() };
-  saveUsers(users);
+      users[username] = { passwordHash: simpleHash(password), createdAt: Date.now() };
+      const saved = await saveUsersToRemote(users);
+      if (!saved) {
+        errEl.textContent = '保存失败，请检查网络后重试';
+        return;
+      }
 
-  // 自动登录
-  loginAs(username);
-  toast('注册成功！', 'success');
+      // 初始化用户数据文件
+      await githubSaveFile('user_data_' + username + '.json', { qrcodes: {} }, 'init: user data for ' + username);
+
+      // 自动登录
+      loginAs(username);
+      toast('注册成功！（数据已云端保存）', 'success');
+    } catch (e) {
+      errEl.textContent = '注册失败：' + e.message;
+    }
+  })();
 }
 
 function doLogin() {
@@ -990,13 +1108,21 @@ function doLogin() {
   if (!username) { errEl.textContent = '请输入用户名'; return; }
   if (!password) { errEl.textContent = '请输入密码'; return; }
 
-  const users = getUsers();
-  const user = users[username];
-  if (!user) { errEl.textContent = '用户不存在'; return; }
-  if (user.passwordHash !== simpleHash(password)) { errEl.textContent = '密码错误'; return; }
+  // 异步登录
+  errEl.textContent = '登录中...';
+  (async () => {
+    try {
+      const users = await loadUsersFromRemote();
+      const user = users[username];
+      if (!user) { errEl.textContent = '用户不存在'; return; }
+      if (user.passwordHash !== simpleHash(password)) { errEl.textContent = '密码错误'; return; }
 
-  loginAs(username);
-  toast('登录成功！', 'success');
+      loginAs(username);
+      toast('登录成功！', 'success');
+    } catch (e) {
+      errEl.textContent = '登录失败：' + e.message;
+    }
+  })();
 }
 
 function loginAs(username) {
@@ -1013,14 +1139,33 @@ function logoutUser() {
   showAuthPage();
 }
 
-function checkSession() {
+async function checkSession() {
   const session = localStorage.getItem(SESSION_KEY);
-  const users = getUsers();
-  if (session && users[session]) {
-    currentUser = session;
-    updateUserUI();
-    return true;
-  }
+  if (!session) { showAuthPage(); return false; }
+  
+  // 验证用户是否在远程存在
+  try {
+    const users = await loadUsersFromRemote();
+    if (users[session]) {
+      currentUser = session;
+      updateUserUI();
+      return true;
+    }
+  } catch {}
+  
+  // 网络失败时用本地缓存验证
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    if (raw) {
+      const users = JSON.parse(raw);
+      if (users[session]) {
+        currentUser = session;
+        updateUserUI();
+        return true;
+      }
+    }
+  } catch {}
+  
   showAuthPage();
   return false;
 }
@@ -1055,13 +1200,12 @@ function showLogin() {
   document.getElementById('loginError').textContent = '';
 }
 
-// ==================== Remote Data Layer (GitHub) ====================
-// 从 GitHub 读取远程数据（公开读，无需 token）
+// ==================== Remote Data Layer (GitHub per-user) ====================
+// 从 GitHub 读取当前用户的远程数据
 async function fetchRemoteDB() {
+  if (!currentUser) return null;
   try {
-    const res = await fetch(GITHUB_RAW + '?t=' + Date.now());
-    if (!res.ok) return null;
-    const data = await res.json();
+    const data = await githubGetFile('user_data_' + currentUser + '.json');
     if (data && data.qrcodes) {
       remoteDB = data;
       return data;
@@ -1070,51 +1214,12 @@ async function fetchRemoteDB() {
   } catch { return null; }
 }
 
-// 推送数据到 GitHub（通过 CORS 代理或直接 API）
-// 由于 GitHub secret scanning 会阻止 token 推送，我们使用双保险策略：
-// 1. 数据编码在二维码 URL 中（自包含），任何人扫码都能解析
-// 2. 同时尝试推送到 GitHub API 作为备份（如果代理可用）
+// 推送当前用户数据到 GitHub
 async function pushToGitHub(db) {
-  // 尝试通过公共 CORS 代理推送
-  const proxyUrls = [
-    'https://corsproxy.io/?',
-    'https://api.allorigins.win/raw?url='
-  ];
-  
-  for (const proxy of proxyUrls) {
-    try {
-      // 先获取 SHA
-      let sha = null;
-      const shaRes = await fetch(proxy + encodeURIComponent(GITHUB_API_URL));
-      if (shaRes.ok) {
-        const shaData = await shaRes.json();
-        if (shaData.sha) sha = shaData.sha;
-      }
-      
-      // 推送数据
-      const content = btoa(unescape(encodeURIComponent(JSON.stringify(db))));
-      const putBody = {
-        message: 'update: sync qrcode data ' + new Date().toISOString().slice(0,16),
-        content: content,
-        branch: 'main'
-      };
-      if (sha) putBody.sha = sha;
-      
-      const putRes = await fetch(proxy + encodeURIComponent(GITHUB_API_URL), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(putBody)
-      });
-      if (putRes.ok) {
-        console.log('Pushed to GitHub via', proxy);
-        return true;
-      }
-    } catch (e) {
-      console.log('Proxy failed:', proxy, e.message);
-    }
-  }
-  console.log('All proxy attempts failed, data stored in URL only');
-  return false;
+  if (!currentUser) return false;
+  const path = 'user_data_' + currentUser + '.json';
+  const result = await githubSaveFile(path, db, 'update: sync qrcode data for ' + currentUser + ' ' + new Date().toISOString().slice(0,16));
+  return !!result;
 }
 
 // ==================== URL Data Encoding ====================
@@ -1919,18 +2024,16 @@ document.getElementById('viewModal').addEventListener('click', e => { if (e.targ
 
 // ==================== Init ====================
 window.addEventListener('hashchange', handleRoute);
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   // 先检查登录态（扫码页面除外）
   if (window.location.hash.startsWith('#/s/') || window.location.hash.startsWith('#/scan/')) {
     handleRoute();
     return;
   }
-  const loggedIn = checkSession();
+  const loggedIn = await checkSession();
   if (loggedIn) {
     handleRoute();
-    if (!window.location.hash.startsWith('#/scan/')) {
-      syncFromRemote();
-    }
+    syncFromRemote();
   }
 });
 
@@ -1951,9 +2054,10 @@ async function syncFromRemote() {
     if (changed) {
       // 保存到 localStorage 但不同步回 GitHub（避免循环）
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ qrcodes: localDB.qrcodes }));
+        localStorage.setItem(getUserStorageKey(), JSON.stringify({ qrcodes: localDB.qrcodes }));
       } catch {}
       console.log('Synced from GitHub:', Object.keys(data.qrcodes).length, 'records');
+      toast('已从云端同步 ' + Object.keys(data.qrcodes).length + ' 条数据', 'info');
     }
   } catch (e) {
     console.log('Sync from remote failed:', e);
