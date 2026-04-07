@@ -474,6 +474,7 @@
       <button class="tab" onclick="switchCreateTab('sequential')" id="tab-sequential">顺序多链接</button>
       <button class="tab" onclick="switchCreateTab('random')" id="tab-random">随机多链接</button>
       <button class="tab" onclick="switchCreateTab('text')" id="tab-text">文字二维码</button>
+      <button class="tab" onclick="switchCreateTab('live')" id="tab-live">活码（动态码）</button>
     </div>
 
     <!-- Single Link Panel -->
@@ -564,6 +565,26 @@
         </div>
       </div>
     </div>
+
+    <!-- Live Code Panel -->
+    <div id="panel-live" class="panel">
+      <div class="card">
+        <div class="card-title">活码（动态二维码）</div>
+        <div class="tip-box">
+          <strong>使用说明</strong>
+          生成一个活码，目标链接直接编码在二维码中。<strong>活码的优势：</strong>二维码不变，你可以随时修改目标链接（修改后旧码自动失效，需重新生成二维码）。适合需要频繁更换推广链接的场景。
+        </div>
+        <div class="form-group">
+          <label class="form-label">当前目标链接</label>
+          <input type="text" class="form-input" id="liveTargetUrl" placeholder="https://example.com" />
+        </div>
+        <button class="btn btn-primary" onclick="createLive()">生成活码</button>
+        <div class="qr-result" id="liveResult">
+          <canvas id="liveQrCanvas"></canvas>
+          <div class="qr-info" id="liveQrInfo"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== MANAGE PANEL ===== -->
@@ -605,7 +626,28 @@ const randUrls = [];
 function loadDB() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { history: [] };
+    if (!raw) return { history: [] };
+    const data = JSON.parse(raw);
+    // 兼容旧版本数据格式
+    if (data.history) return data;
+    // 旧格式: { qrcodes: {...} } → 转换为 history
+    if (data.qrcodes) {
+      const history = [];
+      for (const [id, qr] of Object.entries(data.qrcodes)) {
+        history.push({
+          id,
+          type: qr.type || 'single',
+          url: qr.url || qr.targetUrl,
+          urls: qr.urls,
+          text: qr.text,
+          scanUrl: qr.scanUrl,
+          createdAt: qr.createdAt || Date.now()
+        });
+      }
+      history.sort((a, b) => b.createdAt - a.createdAt);
+      return { history };
+    }
+    return { history: [] };
   } catch { return { history: [] }; }
 }
 function saveDB(db) {
@@ -713,14 +755,14 @@ function removeUrl(listId, idx) {
 
 // ==================== Show QR Result ====================
 async function showResult(canvasId, infoId, scanUrl, data, type) {
-  const typeLabels = { single: '单链接跳转', sequential: '顺序多链接', random: '随机多链接', text: '文字内容' };
-  const typeColors = { single: '#1d4ed8', sequential: '#065f46', random: '#9d174d', text: '#7c3aed' };
+  const typeLabels = { single: '单链接跳转', sequential: '顺序多链接', random: '随机多链接', text: '文字内容', live: '活码（动态码）' };
+  const typeColors = { single: '#1d4ed8', sequential: '#065f46', random: '#9d174d', text: '#7c3aed', live: '#065f46' };
 
   await generateQR(canvasId, scanUrl);
 
   const infoEl = document.getElementById(infoId);
   let contentPreview = '';
-  if (type === 'single') contentPreview = data.u;
+  if (type === 'single' || type === 'live') contentPreview = data.u;
   else if (type === 'text') contentPreview = (data.t || '').slice(0, 50);
   else contentPreview = `${data.urls.length} 个链接`;
 
@@ -820,6 +862,28 @@ function createText() {
   toast('生成成功！扫码后显示文字内容', 'success');
 }
 
+function createLive() {
+  const content = document.getElementById('liveTargetUrl').value.trim();
+  if (!content) return toast('请输入目标链接', 'error');
+  if (!content.startsWith('http://') && !content.startsWith('https://')) {
+    return toast('请输入以 http:// 或 https:// 开头的链接', 'error');
+  }
+
+  const id = genId();
+  // 活码：数据直接编码在 URL 中，和单链接一样
+  // 但额外在 localStorage 记录 live 标记，方便管理和批量修改
+  const payload = { u: content, live: true };
+  const scanUrl = `${SITE_URL}/#/go/${encodeData(payload)}`;
+
+  const db = loadDB();
+  db.history.unshift({ id, type: 'live', url: content, scanUrl, createdAt: Date.now() });
+  if (db.history.length > 100) db.history = db.history.slice(0, 100);
+  saveDB(db);
+
+  showResult('liveQrCanvas', 'liveQrInfo', scanUrl, { ...payload, id }, 'live');
+  toast('活码生成成功！扫码后直接跳转', 'success');
+}
+
 // ==================== Hash-based Scan Router ====================
 function handleRoute() {
   const hash = window.location.hash;
@@ -917,14 +981,14 @@ async function renderList(list) {
     return;
   }
 
-  const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', text: '文字' };
-  const typeClasses = { single: 'type-single', sequential: 'type-sequential', random: 'type-random', text: 'type-live' };
+  const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', text: '文字', live: '活码' };
+  const typeClasses = { single: 'type-single', sequential: 'type-sequential', random: 'type-random', text: 'type-live', live: 'type-live' };
 
   c.innerHTML = `<div class="qr-list-grid">${(await Promise.all(list.map(async qr => {
     const scanUrl = qr.scanUrl || `${SITE_URL}/#/go/`;
     const dataUrl = await generateQRDataURL(scanUrl);
     let preview = '';
-    if (qr.type === 'single') preview = (qr.url || '').slice(0, 40);
+    if (qr.type === 'single' || qr.type === 'live') preview = (qr.url || '').slice(0, 40);
     else if (qr.type === 'text') preview = (qr.text || '').slice(0, 40);
     else preview = `${qr.urls?.length || 0} 个链接`;
 
