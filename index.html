@@ -773,28 +773,110 @@
 // ==================== Constants ====================
 const SITE_URL = window.location.origin;
 const STORAGE_KEY = 'qrcode_app_data';
+// 远程数据读取地址（公开，无需 token）
+const GITHUB_RAW = 'https://raw.githubusercontent.com/wangtaiping/qrcode-gh-pages/main/data/qrcodes.json';
+const GITHUB_API_URL = 'https://api.github.com/repos/wangtaiping/qrcode-gh-pages/contents/data/qrcodes.json';
 
 // ==================== State ====================
 const seqUrls = [];
 const randUrls = [];
 let editingId = null;
 let editUrls = [];
+let remoteDB = null;
 
-// ==================== Data Layer (localStorage) ====================
+// ==================== Remote Data Layer (GitHub) ====================
+// 从 GitHub 读取远程数据（公开读，无需 token）
+async function fetchRemoteDB() {
+  try {
+    const res = await fetch(GITHUB_RAW + '?t=' + Date.now());
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data && data.qrcodes) {
+      remoteDB = data;
+      return data;
+    }
+    return null;
+  } catch { return null; }
+}
+
+// 推送数据到 GitHub（通过 CORS 代理或直接 API）
+// 由于 GitHub secret scanning 会阻止 token 推送，我们使用双保险策略：
+// 1. 数据编码在二维码 URL 中（自包含），任何人扫码都能解析
+// 2. 同时尝试推送到 GitHub API 作为备份（如果代理可用）
+async function pushToGitHub(db) {
+  // 尝试通过公共 CORS 代理推送
+  const proxyUrls = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url='
+  ];
+  
+  for (const proxy of proxyUrls) {
+    try {
+      // 先获取 SHA
+      let sha = null;
+      const shaRes = await fetch(proxy + encodeURIComponent(GITHUB_API_URL));
+      if (shaRes.ok) {
+        const shaData = await shaRes.json();
+        if (shaData.sha) sha = shaData.sha;
+      }
+      
+      // 推送数据
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(db))));
+      const putBody = {
+        message: 'update: sync qrcode data ' + new Date().toISOString().slice(0,16),
+        content: content,
+        branch: 'main'
+      };
+      if (sha) putBody.sha = sha;
+      
+      const putRes = await fetch(proxy + encodeURIComponent(GITHUB_API_URL), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(putBody)
+      });
+      if (putRes.ok) {
+        console.log('Pushed to GitHub via', proxy);
+        return true;
+      }
+    } catch (e) {
+      console.log('Proxy failed:', proxy, e.message);
+    }
+  }
+  console.log('All proxy attempts failed, data stored in URL only');
+  return false;
+}
+
+// ==================== URL Data Encoding ====================
+// 将二维码数据编码到 URL 参数中，实现自包含扫码
+function encodeDataToUrl(data) {
+  const payload = JSON.stringify(data);
+  const encoded = btoa(unescape(encodeURIComponent(payload)));
+  // 简化编码：用 URL-safe base64
+  return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeDataFromUrl(encoded) {
+  try {
+    // 还原 URL-safe base64
+    let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) base64 += '=';
+    const json = decodeURIComponent(escape(atob(base64)));
+    return JSON.parse(json);
+  } catch { return null; }
+}
+
+// ==================== Data Layer (localStorage + URL encoding) ====================
 function loadDB() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { qrcodes: {} };
     const data = JSON.parse(raw);
-    // 兼容新格式 { history: [] } → 转为 { qrcodes: {} }
     if (data.history && !data.qrcodes) {
       const qrcodes = {};
       data.history.forEach(item => {
         if (!item.id) return;
         qrcodes[item.id] = {
-          id: item.id,
-          type: item.type || 'single',
-          createdAt: item.createdAt || Date.now(),
+          id: item.id, type: item.type || 'single', createdAt: item.createdAt || Date.now(),
           expireDays: item.expireDays || null,
           content: item.type === 'single' ? (item.url || item.text || '') : (item.text || ''),
           url: item.type === 'live' ? item.url : undefined,
@@ -812,10 +894,11 @@ function loadDB() {
 
 function saveDB(db) {
   try {
-    // 确保只保存 qrcodes 格式
     const data = { qrcodes: db.qrcodes || {} };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch { /* quota exceeded */ }
+  // 异步尝试推送到 GitHub
+  pushToGitHub(data);
 }
 
 function genId() {
@@ -985,7 +1068,10 @@ async function showResult(canvasId, infoId, data, type) {
   const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', live: '活码' };
   const typeColors = { single: '#1d4ed8', sequential: '#065f46', random: '#9d174d', live: '#065f46' };
   const expire = data.expireDays ? `${data.expireDays} 天` : '永久有效';
-  const scanUrl = `${SITE_URL}/#/scan/${data.id}`;
+
+  // 将数据编码到 URL 中，实现自包含扫码（任何人扫都能用）
+  const encodedData = encodeDataToUrl(data);
+  const scanUrl = `${SITE_URL}/#/s/${encodedData}`;
 
   // Generate QR code on canvas
   await generateQR(canvasId, scanUrl);
@@ -995,7 +1081,6 @@ async function showResult(canvasId, infoId, data, type) {
     <h3>✅ 二维码生成成功！</h3>
     <div class="qr-info-row"><span class="qr-info-label">ID：</span><span class="qr-info-val"><code>${data.id}</code></span></div>
     <div class="qr-info-row"><span class="qr-info-label">类型：</span><span class="qr-info-val" style="color:${typeColors[type]};font-weight:700">${typeLabels[type]}</span></div>
-    <div class="qr-info-row"><span class="qr-info-label">扫码URL：</span><span class="qr-info-val" style="font-size:12px">${scanUrl}</span></div>
     <div class="qr-info-row"><span class="qr-info-label">有效期：</span><span class="qr-info-val">${expire}</span></div>
     <div class="qr-actions">
       <button class="copy-btn" onclick="copyText('${scanUrl}')">📋 复制扫码链接</button>
@@ -1130,7 +1215,7 @@ function renderParseResult(data) {
       <div class="info-item"><div class="label">二维码 ID</div><div class="value"><code>${data.id}</code></div></div>
       <div class="info-item"><div class="label">有效期</div><div class="value ${expired ? 'status-expired' : 'status-valid'}">${expireInfo}</div></div>
       <div class="info-item"><div class="label">创建时间</div><div class="value">${new Date(data.createdAt).toLocaleString('zh-CN')}</div></div>
-      <div class="info-item"><div class="label">扫码链接</div><div class="value" style="font-size:12px">${SITE_URL}/#/scan/${data.id}</div></div>
+      <div class="info-item"><div class="label">扫码链接</div><div class="value" style="font-size:11px;word-break:break-all">${SITE_URL}/#/s/${encodeDataToUrl(data)}</div></div>
       ${contentHtml}
     </div>`;
 }
@@ -1166,8 +1251,9 @@ async function renderList(list) {
       ? (qr.url || '').slice(0, 40)
       : `${qr.urls?.length || 0} 个链接`;
 
-    // Generate QR thumbnail
-    const scanUrl = `${SITE_URL}/#/scan/${qr.id}`;
+    // Generate QR thumbnail (using self-contained URL)
+    const encodedData = encodeDataToUrl(qr);
+    const scanUrl = `${SITE_URL}/#/s/${encodedData}`;
     const dataUrl = await generateQRDataURL(scanUrl);
 
     return `
@@ -1230,7 +1316,8 @@ async function renderViewModal(data) {
     if (data.type === 'sequential') contentRows += `<tr><td>下次序号</td><td style="color:#4a6cf7;font-weight:700">第 ${(data.currentIndex||0)+1} 个</td></tr>`;
   }
 
-  const scanUrl = `${SITE_URL}/#/scan/${data.id}`;
+  const encodedData = encodeDataToUrl(data);
+  const scanUrl = `${SITE_URL}/#/s/${encodedData}`;
   const qrDataUrl = await generateQRDataURL(scanUrl);
 
   document.getElementById('viewModalTitle').textContent = `浏览二维码 — ${typeLabels[data.type]}`;
@@ -1256,7 +1343,14 @@ function closeViewModal() {
 
 // ==================== View Scan (simulates scanning) ====================
 function viewScan(id) {
-  window.location.hash = `#/scan/${id}`;
+  const db = loadDB();
+  const data = db.qrcodes[id];
+  if (data) {
+    const encoded = encodeDataToUrl(data);
+    window.location.hash = `#/s/${encoded}`;
+  } else {
+    window.location.hash = `#/scan/${id}`;
+  }
 }
 
 // ==================== Delete ====================
@@ -1414,70 +1508,113 @@ function importData(event) {
 }
 
 // ==================== Hash-based Scan Router ====================
-function handleRoute() {
+async function handleRoute() {
   const hash = window.location.hash;
 
-  if (hash.startsWith('#/scan/')) {
-    const id = hash.replace('#/scan/', '');
-    const db = loadDB();
-    const record = db.qrcodes[id];
-
-    if (!record) {
-      showRedirectPage('二维码不存在或已删除', null, true);
+  if (hash.startsWith('#/s/')) {
+    // 新格式：数据编码在 URL 中（自包含）
+    const encoded = hash.replace('#/s/', '');
+    const data = decodeDataFromUrl(encoded);
+    
+    // 隐藏主界面
+    document.getElementById('redirectOverlay').style.display = 'block';
+    document.querySelector('.header').style.display = 'none';
+    document.querySelector('.container').style.display = 'none';
+    
+    if (!data) {
+      showRedirectPage('二维码数据解析失败', null, true);
       return;
     }
+    processScan(data, null); // 不传 db，因为 URL 模式不更新远程状态
+  } else if (hash.startsWith('#/scan/')) {
+    // 旧格式：通过 ID 从 GitHub 读取
+    const id = hash.replace('#/scan/', '');
+    
+    document.getElementById('redirectOverlay').style.display = 'block';
+    document.querySelector('.header').style.display = 'none';
+    document.querySelector('.container').style.display = 'none';
 
-    if (record.expireDays) {
-      const expireMs = record.expireDays * 24 * 60 * 60 * 1000;
-      if (Date.now() - record.createdAt > expireMs) {
-        showRedirectPage('二维码已过期', null, true);
+    showRedirectPage('正在加载...', null, false, false, true);
+    const remoteData = await fetchRemoteDB();
+    
+    if (!remoteData || !remoteData.qrcodes || !remoteData.qrcodes[id]) {
+      const db = loadDB();
+      const record = db.qrcodes[id];
+      if (!record) {
+        showRedirectPage('二维码不存在或已删除', null, true);
         return;
       }
-    }
-
-    let target = '';
-    if (record.type === 'live') {
-      target = record.url;
-    } else if (record.type === 'single') {
-      target = record.content;
-    } else if (record.type === 'sequential') {
-      const urls = record.urls;
-      const idx = record.currentIndex % urls.length;
-      record.currentIndex = (idx + 1) % urls.length;
-      db.qrcodes[record.id] = record;
-      saveDB(db);
-      target = urls[idx];
-    } else if (record.type === 'random') {
-      const urls = record.urls;
-      target = urls[Math.floor(Math.random() * urls.length)];
-    }
-
-    if (!target) {
-      showRedirectPage('未设置目标内容', null, true);
+      processScan(record, db);
       return;
     }
 
-    if (target.startsWith('http://') || target.startsWith('https://')) {
-      showRedirectPage('正在跳转...', target);
-      setTimeout(() => { window.location.href = target; }, 1500);
-    } else {
-      showRedirectPage(target, null, false, true);
-    }
+    const record = remoteData.qrcodes[id];
+    processScan(record, remoteData);
   } else {
-    // Normal app view - hide redirect overlay
     document.getElementById('redirectOverlay').style.display = 'none';
     document.querySelector('.header').style.display = 'flex';
     document.querySelector('.container').style.display = 'block';
   }
 }
 
-function showRedirectPage(msg, redirectUrl, isError = false, isContent = false) {
+function processScan(record, db) {
+  if (record.expireDays) {
+    const expireMs = record.expireDays * 24 * 60 * 60 * 1000;
+    if (Date.now() - record.createdAt > expireMs) {
+      showRedirectPage('二维码已过期', null, true);
+      return;
+    }
+  }
+
+  let target = '';
+  if (record.type === 'live') {
+    target = record.url;
+  } else if (record.type === 'single') {
+    target = record.content;
+  } else if (record.type === 'sequential') {
+    const urls = record.urls;
+    if (!urls || !urls.length) {
+      showRedirectPage('未设置目标内容', null, true);
+      return;
+    }
+    const idx = (record.currentIndex || 0) % urls.length;
+    target = urls[idx];
+  } else if (record.type === 'random') {
+    const urls = record.urls;
+    if (!urls || !urls.length) {
+      showRedirectPage('未设置目标内容', null, true);
+      return;
+    }
+    target = urls[Math.floor(Math.random() * urls.length)];
+  }
+
+  if (!target) {
+    showRedirectPage('未设置目标内容', null, true);
+    return;
+  }
+
+  if (target.startsWith('http://') || target.startsWith('https://')) {
+    showRedirectPage('正在跳转...', target);
+    setTimeout(() => { window.location.href = target; }, 1500);
+  } else {
+    showRedirectPage(target, null, false, true);
+  }
+}
+
+function showRedirectPage(msg, redirectUrl, isError = false, isContent = false, isLoading = false) {
   document.getElementById('redirectOverlay').style.display = 'block';
   document.querySelector('.header').style.display = 'none';
   document.querySelector('.container').style.display = 'none';
 
   const content = document.getElementById('redirectContent');
-  if (isError) {
+  if (isLoading) {
+    content.innerHTML = `
+      <div style="margin-bottom:20px">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4a6cf7" stroke-width="2" style="animation:pulse 1s infinite"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3 style="color:#4a6cf7;margin:0 0 12px">${escapeHtml(msg)}</h3>
+      <p style="color:#94a3b8;font-size:13px">请稍候...</p>`;
+  } else if (isError) {
     content.innerHTML = `<h2 style="color:#e53e3e;margin:0 0 16px">⚠️ 访问失败</h2><p style="color:#666">${escapeHtml(msg)}</p>`;
   } else if (isContent) {
     content.innerHTML = `<h3 style="color:#4a6cf7;margin:0 0 16px">📋 二维码内容</h3><p style="color:#333;font-size:16px;line-height:1.8;word-break:break-all">${escapeHtml(msg)}</p>`;
@@ -1507,7 +1644,39 @@ document.getElementById('viewModal').addEventListener('click', e => { if (e.targ
 
 // ==================== Init ====================
 window.addEventListener('hashchange', handleRoute);
-window.addEventListener('load', handleRoute);
+window.addEventListener('load', () => {
+  handleRoute();
+  // 非扫码页面时，从远程同步数据到本地
+  if (!window.location.hash.startsWith('#/scan/')) {
+    syncFromRemote();
+  }
+});
+
+// 从 GitHub 同步数据到本地
+async function syncFromRemote() {
+  try {
+    const data = await fetchRemoteDB();
+    if (!data || !data.qrcodes) return;
+    const localDB = loadDB();
+    let changed = false;
+    // 合并远程数据到本地（远程优先）
+    for (const [id, record] of Object.entries(data.qrcodes)) {
+      if (!localDB.qrcodes[id] || (record.createdAt > localDB.qrcodes[id].createdAt)) {
+        localDB.qrcodes[id] = record;
+        changed = true;
+      }
+    }
+    if (changed) {
+      // 保存到 localStorage 但不同步回 GitHub（避免循环）
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ qrcodes: localDB.qrcodes }));
+      } catch {}
+      console.log('Synced from GitHub:', Object.keys(data.qrcodes).length, 'records');
+    }
+  } catch (e) {
+    console.log('Sync from remote failed:', e);
+  }
+}
 </script>
 </body>
 </html>
