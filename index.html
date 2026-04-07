@@ -784,12 +784,38 @@ let editUrls = [];
 function loadDB() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { qrcodes: {} };
+    if (!raw) return { qrcodes: {} };
+    const data = JSON.parse(raw);
+    // 兼容新格式 { history: [] } → 转为 { qrcodes: {} }
+    if (data.history && !data.qrcodes) {
+      const qrcodes = {};
+      data.history.forEach(item => {
+        if (!item.id) return;
+        qrcodes[item.id] = {
+          id: item.id,
+          type: item.type || 'single',
+          createdAt: item.createdAt || Date.now(),
+          expireDays: item.expireDays || null,
+          content: item.type === 'single' ? (item.url || item.text || '') : (item.text || ''),
+          url: item.type === 'live' ? item.url : undefined,
+          name: item.type === 'live' ? item.name || '未命名活码' : undefined,
+          urls: (item.urls && item.urls.length) ? item.urls : undefined,
+          currentIndex: item.currentIndex || 0
+        };
+      });
+      return { qrcodes };
+    }
+    if (data.qrcodes) return data;
+    return { qrcodes: {} };
   } catch { return { qrcodes: {} }; }
 }
 
 function saveDB(db) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); } catch { /* quota exceeded */ }
+  try {
+    // 确保只保存 qrcodes 格式
+    const data = { qrcodes: db.qrcodes || {} };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch { /* quota exceeded */ }
 }
 
 function genId() {
