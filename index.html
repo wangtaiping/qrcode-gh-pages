@@ -1595,7 +1595,7 @@ function processScan(record, db) {
 
   if (target.startsWith('http://') || target.startsWith('https://')) {
     showRedirectPage('正在跳转...', target);
-    setTimeout(() => { window.location.href = target; }, 1500);
+    setTimeout(() => { window.location.href = target; }, 100);
   } else {
     showRedirectPage(target, null, false, true);
   }
