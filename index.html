@@ -94,6 +94,7 @@
       color: white;
       box-shadow: 0 2px 12px rgba(74,108,247,0.35);
     }
+    .tab-icon { font-size: 16px; display:block; margin-bottom: 2px; }
 
     /* ===== Panel ===== */
     .panel { display: none; }
@@ -189,8 +190,9 @@
     }
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
     .btn-sm { padding: 7px 14px; font-size: 12px; }
+    .btn-loading { opacity: 0.7; cursor: not-allowed; }
 
-    /* ===== URL List ===== */
+    /* ===== URL List for multi-link ===== */
     .url-list { list-style: none; margin: 12px 0; }
     .url-item {
       display: flex;
@@ -205,19 +207,30 @@
     .url-index {
       background: var(--primary);
       color: white;
-      width: 24px; height: 24px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       font-size: 12px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
       font-weight: 700;
     }
     .url-text { flex: 1; font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .url-remove {
-      background: none; border: none; cursor: pointer;
-      color: var(--danger); font-size: 18px; padding: 0 4px; line-height: 1;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--danger);
+      font-size: 18px;
+      padding: 0 4px;
+      line-height: 1;
     }
-    .url-add-row { display: flex; gap: 10px; }
+    .url-add-row {
+      display: flex;
+      gap: 10px;
+    }
     .url-add-row .form-input { margin: 0; }
 
     /* ===== QR Result ===== */
@@ -234,20 +247,37 @@
     }
     .qr-result.show { display: flex; }
     .qr-result canvas, .qr-result img {
-      width: 180px; height: 180px;
+      width: 180px;
+      height: 180px;
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      background: white; padding: 8px;
+      background: white;
+      padding: 8px;
     }
     .qr-info { flex: 1; min-width: 200px; }
     .qr-info h3 { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
-    .qr-info-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 13px; }
-    .qr-info-label { color: var(--text-muted); min-width: 70px; font-weight: 600; }
+    .qr-info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .qr-info-label {
+      color: var(--text-muted);
+      min-width: 70px;
+      font-weight: 600;
+    }
     .qr-info-val { color: var(--text); word-break: break-all; }
     .qr-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
     .copy-btn {
-      background: var(--primary); color: white; border: none;
-      padding: 7px 16px; border-radius: 7px; font-size: 12px; cursor: pointer;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 7px;
+      font-size: 12px;
+      cursor: pointer;
       transition: all 0.2s;
     }
     .copy-btn:hover { background: var(--primary-dark); }
@@ -286,10 +316,12 @@
     .type-random { background: #fce7f3; color: #9d174d; }
     .qr-card-body { padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
     .qr-card-img {
-      width: 80px; height: 80px;
+      width: 80px;
+      height: 80px;
       border-radius: 8px;
       object-fit: contain;
-      background: #f8faff; padding: 4px;
+      background: #f8faff;
+      padding: 4px;
       border: 1px solid var(--border);
       flex-shrink: 0;
     }
@@ -298,18 +330,21 @@
     .qr-card-meta strong { color: var(--text); }
     .qr-card-footer {
       padding: 12px 18px;
-      display: flex; gap: 8px;
+      display: flex;
+      gap: 8px;
       border-top: 1px solid var(--border);
       background: #f8faff;
     }
 
-    /* ===== Modal ===== */
+    /* ===== Edit Modal ===== */
     .modal-overlay {
       display: none;
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       background: rgba(0,0,0,0.5);
       z-index: 1000;
-      align-items: center; justify-content: center;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
     }
     .modal-overlay.show { display: flex; }
@@ -328,12 +363,20 @@
 
     /* ===== Toast ===== */
     .toast-container {
-      position: fixed; top: 80px; right: 24px; z-index: 9999;
-      display: flex; flex-direction: column; gap: 10px;
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     .toast {
-      padding: 12px 20px; border-radius: 10px;
-      font-size: 14px; font-weight: 500; color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
       animation: slideIn 0.3s ease;
       max-width: 320px;
@@ -346,59 +389,16 @@
       to { transform: translateX(0); opacity: 1; }
     }
 
-    /* ===== Responsive ===== */
-    @media (max-width: 600px) {
-      .container { padding: 16px 12px; }
-      .card { padding: 20px 16px; }
-      .header { padding: 0 16px; }
-      .header-nav { gap: 6px; }
-      .nav-btn { padding: 6px 12px; font-size: 12px; }
+    /* ===== Scan Info Panel ===== */
+    .scan-info-box {
+      display: none;
+      padding: 20px;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      margin-top: 20px;
+      background: var(--bg);
     }
-
-    .divider { height: 1px; background: var(--border); margin: 20px 0; }
-
-    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
-    .empty-state p { font-size: 15px; }
-
-    .type-live { background: #d1fae5; color: #065f46; }
-
-    .view-modal-qr {
-      display: block; width: 220px; height: 220px;
-      margin: 0 auto 20px;
-      border-radius: 12px;
-      background: white; padding: 10px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
-    }
-    .view-info-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .view-info-table tr { border-bottom: 1px solid var(--border); }
-    .view-info-table tr:last-child { border-bottom: none; }
-    .view-info-table td { padding: 9px 6px; }
-    .view-info-table td:first-child { color: var(--text-muted); font-weight: 600; width: 80px; white-space: nowrap; }
-    .view-info-table td:last-child { color: var(--text); word-break: break-all; }
-
-    .tip-box {
-      background: #eff6ff;
-      border-left: 3px solid var(--primary);
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      font-size: 13px;
-      color: #3730a3;
-      margin-bottom: 20px;
-    }
-    .tip-box strong { display: block; margin-bottom: 4px; }
-
-    .data-note {
-      background: #fef3c7;
-      border: 1px solid #f59e0b;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 12px;
-      color: #92400e;
-      margin-bottom: 20px;
-    }
-    .data-note strong { color: #b45309; }
-
+    .scan-info-box.show { display: block; }
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -412,16 +412,96 @@
     }
     .info-item .label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
     .info-item .value { font-size: 14px; color: var(--text); font-weight: 500; word-break: break-all; }
+    .status-valid { color: var(--success); font-weight: 700; }
+    .status-expired { color: var(--danger); font-weight: 700; }
 
-    .scan-info-box {
-      display: none;
-      padding: 20px;
-      border-radius: var(--radius);
-      border: 2px solid var(--border);
-      margin-top: 20px;
-      background: var(--bg);
+    /* ===== Responsive ===== */
+    @media (max-width: 600px) {
+      .container { padding: 16px 12px; }
+      .card { padding: 20px 16px; }
+      .header { padding: 0 16px; }
+      .header-nav { gap: 6px; }
+      .nav-btn { padding: 6px 12px; font-size: 12px; }
+      .info-grid { grid-template-columns: 1fr; }
     }
-    .scan-info-box.show { display: block; }
+
+    /* ===== Divider ===== */
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* ===== Empty State ===== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state p { font-size: 15px; }
+
+    /* ===== Chips ===== */
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #e0e7ff;
+      color: #4338ca;
+      margin: 2px;
+    }
+
+    /* ===== Live QR badge ===== */
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: linear-gradient(135deg,#10b981,#059669);
+      color: white; padding: 3px 12px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: white;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(0.7)} }
+    .type-live { background: #d1fae5; color: #065f46; }
+
+    /* ===== View Modal ===== */
+    .view-modal-qr {
+      display: block; width: 220px; height: 220px;
+      margin: 0 auto 20px;
+      border-radius: 12px;
+      background: white;
+      padding: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    }
+    .view-info-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .view-info-table tr { border-bottom: 1px solid var(--border); }
+    .view-info-table tr:last-child { border-bottom: none; }
+    .view-info-table td { padding: 9px 6px; }
+    .view-info-table td:first-child { color: var(--text-muted); font-weight: 600; width: 80px; white-space: nowrap; }
+    .view-info-table td:last-child { color: var(--text); word-break: break-all; }
+
+    /* Section tip */
+    .tip-box {
+      background: #eff6ff;
+      border-left: 3px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      color: #3730a3;
+      margin-bottom: 20px;
+    }
+    .tip-box strong { display: block; margin-bottom: 4px; }
+
+    /* ===== Data Note ===== */
+    .data-note {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #92400e;
+      margin-bottom: 20px;
+    }
+    .data-note strong { color: #b45309; }
   </style>
 </head>
 <body>
@@ -445,6 +525,18 @@
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">编辑二维码内容</div>
+    <div id="editModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveEdit()">保存修改</button>
+    </div>
+  </div>
+</div>
+
 <!-- View Modal -->
 <div class="modal-overlay" id="viewModal">
   <div class="modal" style="max-width:480px;text-align:center">
@@ -460,9 +552,9 @@
 
   <!-- Data note -->
   <div class="data-note">
-    <strong>提示：</strong>二维码数据直接编码在链接中，任何人扫码都能直接跳转，无需服务器。管理面板仅用于记录历史。
-    <span id="exportBtn" style="float:right;cursor:pointer;color:#4a6cf7;font-weight:700" onclick="exportData()">导出</span>
-    <span id="importBtn" style="float:right;cursor:pointer;color:#7c3aed;font-weight:700;margin-right:16px" onclick="document.getElementById('importFile').click()">导入</span>
+    <strong>数据存储说明：</strong>所有二维码数据保存在浏览器本地（localStorage），清除浏览器数据会导致丢失。建议定期导出备份。
+    <span id="exportBtn" style="float:right;cursor:pointer;color:#4a6cf7;font-weight:700" onclick="exportData()">导出数据</span>
+    <span id="importBtn" style="float:right;cursor:pointer;color:#7c3aed;font-weight:700;margin-right:16px" onclick="document.getElementById('importFile').click()">导入数据</span>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
   </div>
 
@@ -470,27 +562,46 @@
   <div id="createPanel">
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tab active" onclick="switchCreateTab('single')" id="tab-single">单链接二维码</button>
-      <button class="tab" onclick="switchCreateTab('sequential')" id="tab-sequential">顺序多链接</button>
-      <button class="tab" onclick="switchCreateTab('random')" id="tab-random">随机多链接</button>
-      <button class="tab" onclick="switchCreateTab('text')" id="tab-text">文字二维码</button>
-      <button class="tab" onclick="switchCreateTab('live')" id="tab-live">活码（动态码）</button>
+      <button class="tab active" onclick="switchCreateTab('single')" id="tab-single">
+        <span class="tab-icon">🔗</span>单链接二维码
+      </button>
+      <button class="tab" onclick="switchCreateTab('sequential')" id="tab-sequential">
+        <span class="tab-icon">🔢</span>顺序多链接
+      </button>
+      <button class="tab" onclick="switchCreateTab('random')" id="tab-random">
+        <span class="tab-icon">🎲</span>随机多链接
+      </button>
+      <button class="tab" onclick="switchCreateTab('live')" id="tab-live">
+        <span class="tab-icon">⚡</span>活码
+      </button>
+      <button class="tab" onclick="switchCreateTab('parse')" id="tab-parse">
+        <span class="tab-icon">🔍</span>解析二维码
+      </button>
     </div>
 
     <!-- Single Link Panel -->
     <div id="panel-single" class="panel active">
       <div class="card">
-        <div class="card-title">单链接二维码 <span class="badge">最常用</span></div>
+        <div class="card-title">
+          🔗 单链接 / 文字转二维码
+          <span class="badge">功能 1</span>
+        </div>
         <div class="tip-box">
           <strong>使用说明</strong>
-          输入任意网址，生成二维码。别人扫码后直接跳转到该网址。<strong>无需服务器，任何人扫码都能用。</strong>
+          支持输入任意网址（http/https）、文字内容或图片链接，自动生成动态二维码。扫码后直接跳转或显示内容。
         </div>
         <div class="form-group">
-          <label class="form-label">目标网址</label>
-          <input type="text" class="form-input" id="singleContent" placeholder="https://example.com" />
-          <div class="form-hint">支持 http/https 开头的网址</div>
+          <label class="form-label">内容（URL / 文字 / 图片链接）</label>
+          <input type="text" class="form-input" id="singleContent" placeholder="https://example.com 或 任意文字内容" />
         </div>
-        <button class="btn btn-primary" onclick="createSingle()">生成二维码</button>
+        <div class="form-group">
+          <label class="form-label">有效天数（可选）</label>
+          <input type="number" class="form-input" id="singleExpire" placeholder="留空为永久有效，填写数字如 7 = 7天" min="1" />
+        </div>
+        <button class="btn btn-primary" onclick="createSingle()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 12 9 12 9 6 15 6 15 12 21 12"/><polyline points="9 18 12 21 15 18"/></svg>
+          生成二维码
+        </button>
         <div class="qr-result" id="singleResult">
           <canvas id="singleQrCanvas"></canvas>
           <div class="qr-info" id="singleQrInfo"></div>
@@ -501,10 +612,13 @@
     <!-- Sequential Panel -->
     <div id="panel-sequential" class="panel">
       <div class="card">
-        <div class="card-title">顺序多链接二维码</div>
+        <div class="card-title">
+          🔢 顺序多链接二维码
+          <span class="badge">功能 2</span>
+        </div>
         <div class="tip-box">
           <strong>使用说明</strong>
-          添加多个链接，每次扫码按顺序跳转下一个链接（循环）。例如第1次扫→链接A，第2次扫→链接B，第3次扫→链接C，第4次扫→链接A...
+          添加多个链接，每次扫码按顺序读取下一个链接（循环）。第1次扫→链接1，第2次扫→链接2，以此类推。
         </div>
         <div class="form-group">
           <label class="form-label">添加链接</label>
@@ -514,7 +628,14 @@
           </div>
         </div>
         <ul class="url-list" id="seqUrlList"></ul>
-        <button class="btn btn-primary" onclick="createSequential()">生成顺序二维码</button>
+        <div class="form-group">
+          <label class="form-label">有效天数（可选）</label>
+          <input type="number" class="form-input" id="seqExpire" placeholder="留空为永久有效" min="1" />
+        </div>
+        <button class="btn btn-primary" onclick="createSequential()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 12 9 12 9 6 15 6 15 12 21 12"/><polyline points="9 18 12 21 15 18"/></svg>
+          生成顺序二维码
+        </button>
         <div class="qr-result" id="seqResult">
           <canvas id="seqQrCanvas"></canvas>
           <div class="qr-info" id="seqQrInfo"></div>
@@ -525,10 +646,13 @@
     <!-- Random Panel -->
     <div id="panel-random" class="panel">
       <div class="card">
-        <div class="card-title">随机多链接二维码</div>
+        <div class="card-title">
+          🎲 随机多链接二维码
+          <span class="badge">功能 3</span>
+        </div>
         <div class="tip-box">
           <strong>使用说明</strong>
-          添加多个链接，每次扫码随机跳转其中一个。适用于随机推广、抽奖等场景。
+          添加多个链接，每次扫码随机弹出其中一个链接，适用于随机推广、抽奖等场景。
         </div>
         <div class="form-group">
           <label class="form-label">添加链接</label>
@@ -538,7 +662,14 @@
           </div>
         </div>
         <ul class="url-list" id="randUrlList"></ul>
-        <button class="btn btn-primary" onclick="createRandom()">生成随机二维码</button>
+        <div class="form-group">
+          <label class="form-label">有效天数（可选）</label>
+          <input type="number" class="form-input" id="randExpire" placeholder="留空为永久有效" min="1" />
+        </div>
+        <button class="btn btn-primary" onclick="createRandom()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 12 9 12 9 6 15 6 15 12 21 12"/><polyline points="9 18 12 21 15 18"/></svg>
+          生成随机二维码
+        </button>
         <div class="qr-result" id="randResult">
           <canvas id="randQrCanvas"></canvas>
           <div class="qr-info" id="randQrInfo"></div>
@@ -546,43 +677,62 @@
       </div>
     </div>
 
-    <!-- Text Panel -->
-    <div id="panel-text" class="panel">
-      <div class="card">
-        <div class="card-title">文字/名片二维码</div>
-        <div class="tip-box">
-          <strong>使用说明</strong>
-          输入任意文字内容（如姓名、电话、地址、WiFi 信息等），扫码后直接显示文字。
-        </div>
-        <div class="form-group">
-          <label class="form-label">文字内容</label>
-          <textarea class="form-textarea" id="textContent" placeholder="输入任意文字内容，例如：&#10;姓名：张三&#10;电话：13800138000&#10;地址：广州市天河区"></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="createText()">生成文字二维码</button>
-        <div class="qr-result" id="textResult">
-          <canvas id="textQrCanvas"></canvas>
-          <div class="qr-info" id="textQrInfo"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Live Code Panel -->
+    <!-- Live QR Panel -->
     <div id="panel-live" class="panel">
       <div class="card">
-        <div class="card-title">活码（动态二维码）</div>
+        <div class="card-title">
+          ⚡ 活码
+          <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+        </div>
         <div class="tip-box">
-          <strong>使用说明</strong>
-          生成一个活码，目标链接直接编码在二维码中。<strong>活码的优势：</strong>二维码不变，你可以随时修改目标链接（修改后旧码自动失效，需重新生成二维码）。适合需要频繁更换推广链接的场景。
+          <strong>活码说明</strong>
+          生成后二维码图片永不改变，但扫码目标 URL 可随时修改。适合印刷物料、海报、名片等场景——印好之后仍可更改跳转地址。
         </div>
         <div class="form-group">
-          <label class="form-label">当前目标链接</label>
-          <input type="text" class="form-input" id="liveTargetUrl" placeholder="https://example.com" />
+          <label class="form-label">活码名称（备注用）</label>
+          <input type="text" class="form-input" id="liveName" placeholder="例如：门店海报、产品包装二维码" />
         </div>
-        <button class="btn btn-primary" onclick="createLive()">生成活码</button>
+        <div class="form-group">
+          <label class="form-label">当前目标 URL</label>
+          <input type="text" class="form-input" id="liveUrl" placeholder="https://example.com" />
+          <div class="form-hint">生成后可随时在管理页面修改此地址，二维码图片不变</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">有效天数（可选）</label>
+          <input type="number" class="form-input" id="liveExpire" placeholder="留空为永久有效" min="1" />
+        </div>
+        <button class="btn btn-primary" onclick="createLive()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          生成活码
+        </button>
         <div class="qr-result" id="liveResult">
           <canvas id="liveQrCanvas"></canvas>
           <div class="qr-info" id="liveQrInfo"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- Parse Panel -->
+    <div id="panel-parse" class="panel">
+      <div class="card">
+        <div class="card-title">
+          🔍 解析 / 查询二维码
+          <span class="badge">功能 4</span>
+        </div>
+        <div class="tip-box">
+          <strong>使用说明</strong>
+          输入二维码ID（创建时显示的唯一编号），可查看当前配置的链接、类型、有效期及状态等信息。
+        </div>
+        <div class="form-group">
+          <label class="form-label">二维码 ID</label>
+          <input type="text" class="form-input" id="parseId" placeholder="输入二维码ID，例如: a1b2c3d4e5f6" />
+          <div class="form-hint">在"管理"页面或创建时可查看ID</div>
+        </div>
+        <button class="btn btn-primary" onclick="parseQR()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          查询二维码
+        </button>
+        <div class="scan-info-box" id="parseResult"></div>
       </div>
     </div>
   </div>
@@ -591,14 +741,20 @@
   <div id="managePanel" style="display:none">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-        <div class="card-title" style="margin:0">历史记录</div>
+        <div class="card-title" style="margin:0">📋 二维码列表</div>
         <div style="display:flex;gap:10px">
-          <button class="btn btn-outline btn-sm" onclick="loadList()">刷新</button>
-          <button class="btn btn-danger btn-sm" onclick="clearAll()">清空全部</button>
+          <button class="btn btn-outline btn-sm" onclick="loadList()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+            刷新
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('create')">+ 新建二维码</button>
         </div>
       </div>
       <div id="qrListContainer">
-        <div class="empty-state"><div class="empty-icon">📭</div><p>加载中...</p></div>
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <p>加载中...</p>
+        </div>
       </div>
     </div>
   </div>
@@ -621,73 +777,38 @@ const STORAGE_KEY = 'qrcode_app_data';
 // ==================== State ====================
 const seqUrls = [];
 const randUrls = [];
+let editingId = null;
+let editUrls = [];
 
-// ==================== Data Layer (localStorage for history only) ====================
+// ==================== Data Layer (localStorage) ====================
 function loadDB() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { history: [] };
-    const data = JSON.parse(raw);
-    // 兼容旧版本数据格式
-    if (data.history) return data;
-    // 旧格式: { qrcodes: {...} } → 转换为 history
-    if (data.qrcodes) {
-      const history = [];
-      for (const [id, qr] of Object.entries(data.qrcodes)) {
-        history.push({
-          id,
-          type: qr.type || 'single',
-          url: qr.url || qr.targetUrl,
-          urls: qr.urls,
-          text: qr.text,
-          scanUrl: qr.scanUrl,
-          createdAt: qr.createdAt || Date.now()
-        });
-      }
-      history.sort((a, b) => b.createdAt - a.createdAt);
-      return { history };
-    }
-    return { history: [] };
-  } catch { return { history: [] }; }
+    return raw ? JSON.parse(raw) : { qrcodes: {} };
+  } catch { return { qrcodes: {} }; }
 }
+
 function saveDB(db) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); } catch {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); } catch { /* quota exceeded */ }
 }
+
 function genId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  return 'xxxxxxxxxxxx'.replace(/x/g, () => ((Math.random()*16)|0).toString(16));
 }
 
-// ==================== URL-safe Base64 ====================
-function encodeData(obj) {
-  // Encode JSON object to URL-safe base64
-  const json = JSON.stringify(obj);
-  const encoded = btoa(unescape(encodeURIComponent(json)));
-  // Make URL-safe
-  return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function decodeData(str) {
-  try {
-    // Restore base64 padding and standard chars
-    let s = str.replace(/-/g, '+').replace(/_/g, '/');
-    while (s.length % 4) s += '=';
-    const json = decodeURIComponent(escape(atob(s)));
-    return JSON.parse(json);
-  } catch { return null; }
-}
-
-// ==================== QR Generation ====================
+// ==================== QR Generation (browser-side) ====================
 function generateQR(canvasId, text) {
   return new Promise((resolve, reject) => {
     const canvas = document.getElementById(canvasId);
-    QRCode.toCanvas(canvas, text, { width: 300, errorCorrectionLevel: 'M', margin: 1 }, (err) => {
-      if (err) reject(err); else resolve(canvas);
+    QRCode.toCanvas(canvas, text, { width: 300, errorCorrectionLevel: 'H', margin: 1 }, (err) => {
+      if (err) reject(err);
+      else resolve(canvas);
     });
   });
 }
 
 function generateQRDataURL(text) {
-  return QRCode.toDataURL(text, { width: 300, errorCorrectionLevel: 'M', margin: 1 });
+  return QRCode.toDataURL(text, { width: 300, errorCorrectionLevel: 'H', margin: 1 });
 }
 
 // ==================== Toast ====================
@@ -751,30 +872,32 @@ function addRandUrl() {
 function removeUrl(listId, idx) {
   if (listId === 'seqUrlList') seqUrls.splice(idx, 1), renderUrlList('seqUrlList', seqUrls);
   else if (listId === 'randUrlList') randUrls.splice(idx, 1), renderUrlList('randUrlList', randUrls);
+  else if (listId === 'editUrlList') editUrls.splice(idx, 1), renderUrlList('editUrlList', editUrls);
 }
 
 // ==================== Show QR Result ====================
-async function showResult(canvasId, infoId, scanUrl, data, type) {
-  const typeLabels = { single: '单链接跳转', sequential: '顺序多链接', random: '随机多链接', text: '文字内容', live: '活码（动态码）' };
-  const typeColors = { single: '#1d4ed8', sequential: '#065f46', random: '#9d174d', text: '#7c3aed', live: '#065f46' };
+async function showResult(canvasId, infoId, data, type) {
+  const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', live: '活码' };
+  const typeColors = { single: '#1d4ed8', sequential: '#065f46', random: '#9d174d', live: '#065f46' };
+  const expire = data.expireDays ? `${data.expireDays} 天` : '永久有效';
+  const scanUrl = `${SITE_URL}/#/scan/${data.id}`;
 
+  // Generate QR code on canvas
   await generateQR(canvasId, scanUrl);
 
   const infoEl = document.getElementById(infoId);
-  let contentPreview = '';
-  if (type === 'single' || type === 'live') contentPreview = data.u;
-  else if (type === 'text') contentPreview = (data.t || '').slice(0, 50);
-  else contentPreview = `${data.urls.length} 个链接`;
-
   infoEl.innerHTML = `
-    <h3>二维码生成成功！</h3>
+    <h3>✅ 二维码生成成功！</h3>
+    <div class="qr-info-row"><span class="qr-info-label">ID：</span><span class="qr-info-val"><code>${data.id}</code></span></div>
     <div class="qr-info-row"><span class="qr-info-label">类型：</span><span class="qr-info-val" style="color:${typeColors[type]};font-weight:700">${typeLabels[type]}</span></div>
-    <div class="qr-info-row"><span class="qr-info-label">内容：</span><span class="qr-info-val" style="font-size:12px">${escapeHtml(contentPreview)}</span></div>
+    <div class="qr-info-row"><span class="qr-info-label">扫码URL：</span><span class="qr-info-val" style="font-size:12px">${scanUrl}</span></div>
+    <div class="qr-info-row"><span class="qr-info-label">有效期：</span><span class="qr-info-val">${expire}</span></div>
     <div class="qr-actions">
-      <button class="copy-btn" onclick="copyText('${scanUrl}')">复制链接</button>
-      <button class="copy-btn" style="background:var(--success)" onclick="downloadQR('${canvasId}','${data.id}')">下载图片</button>
+      <button class="copy-btn" onclick="copyText('${scanUrl}')">📋 复制扫码链接</button>
+      <button class="copy-btn" style="background:var(--success)" onclick="downloadQR('${canvasId}','${data.id}')">⬇️ 下载图片</button>
     </div>`;
 
+  // Show the result container
   document.getElementById(canvasId).closest('.qr-result').className = 'qr-result show';
 }
 
@@ -787,262 +910,369 @@ function downloadQR(canvasId, id) {
 }
 
 function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => toast('已复制', 'success')).catch(() => toast('复制失败', 'error'));
+  navigator.clipboard.writeText(text).then(() => toast('已复制到剪贴板', 'success')).catch(() => toast('复制失败', 'error'));
 }
 
 // ==================== Create Functions ====================
 function createSingle() {
   const content = document.getElementById('singleContent').value.trim();
-  if (!content) return toast('请输入网址', 'error');
-  if (!content.startsWith('http://') && !content.startsWith('https://')) {
-    return toast('请输入以 http:// 或 https:// 开头的网址', 'error');
-  }
-
-  const id = genId();
-  // Encode target URL directly into the scan URL
-  const payload = { u: content };
-  const scanUrl = `${SITE_URL}/#/go/${encodeData(payload)}`;
-
-  // Save to history
+  const expireDays = document.getElementById('singleExpire').value;
+  if (!content) return toast('请输入内容', 'error');
   const db = loadDB();
-  db.history.unshift({ id, type: 'single', url: content, scanUrl, createdAt: Date.now() });
-  if (db.history.length > 100) db.history = db.history.slice(0, 100);
+  const id = genId();
+  db.qrcodes[id] = {
+    id, type: 'single', createdAt: Date.now(),
+    expireDays: expireDays ? Number(expireDays) : null,
+    content
+  };
   saveDB(db);
-
-  showResult('singleQrCanvas', 'singleQrInfo', scanUrl, { ...payload, id }, 'single');
-  toast('生成成功！任何人扫码都能跳转', 'success');
+  showResult('singleQrCanvas', 'singleQrInfo', db.qrcodes[id], 'single');
+  toast('单链接二维码生成成功！', 'success');
 }
 
 function createSequential() {
   if (!seqUrls.length) return toast('请至少添加一个链接', 'error');
-
-  const id = genId();
-  const payload = { m: 'seq', urls: seqUrls };
-  const scanUrl = `${SITE_URL}/#/go/${encodeData(payload)}`;
-
+  const expireDays = document.getElementById('seqExpire').value;
   const db = loadDB();
-  db.history.unshift({ id, type: 'sequential', urls: [...seqUrls], scanUrl, createdAt: Date.now() });
-  if (db.history.length > 100) db.history = db.history.slice(0, 100);
+  const id = genId();
+  db.qrcodes[id] = {
+    id, type: 'sequential', createdAt: Date.now(),
+    expireDays: expireDays ? Number(expireDays) : null,
+    urls: [...seqUrls], currentIndex: 0
+  };
   saveDB(db);
-
-  showResult('seqQrCanvas', 'seqQrInfo', scanUrl, { ...payload, id }, 'sequential');
-  toast('生成成功！每次扫码按顺序跳转下一个链接', 'success');
+  showResult('seqQrCanvas', 'seqQrInfo', db.qrcodes[id], 'sequential');
+  toast('顺序多链接二维码生成成功！', 'success');
 }
 
 function createRandom() {
   if (!randUrls.length) return toast('请至少添加一个链接', 'error');
-
-  const id = genId();
-  const payload = { m: 'rand', urls: randUrls };
-  const scanUrl = `${SITE_URL}/#/go/${encodeData(payload)}`;
-
+  const expireDays = document.getElementById('randExpire').value;
   const db = loadDB();
-  db.history.unshift({ id, type: 'random', urls: [...randUrls], scanUrl, createdAt: Date.now() });
-  if (db.history.length > 100) db.history = db.history.slice(0, 100);
-  saveDB(db);
-
-  showResult('randQrCanvas', 'randQrInfo', scanUrl, { ...payload, id }, 'random');
-  toast('生成成功！每次扫码随机跳转一个链接', 'success');
-}
-
-function createText() {
-  const content = document.getElementById('textContent').value.trim();
-  if (!content) return toast('请输入文字内容', 'error');
-
   const id = genId();
-  const payload = { m: 'text', t: content };
-  const scanUrl = `${SITE_URL}/#/go/${encodeData(payload)}`;
-
-  const db = loadDB();
-  db.history.unshift({ id, type: 'text', text: content, scanUrl, createdAt: Date.now() });
-  if (db.history.length > 100) db.history = db.history.slice(0, 100);
+  db.qrcodes[id] = {
+    id, type: 'random', createdAt: Date.now(),
+    expireDays: expireDays ? Number(expireDays) : null,
+    urls: [...randUrls]
+  };
   saveDB(db);
-
-  showResult('textQrCanvas', 'textQrInfo', scanUrl, { ...payload, id }, 'text');
-  toast('生成成功！扫码后显示文字内容', 'success');
+  showResult('randQrCanvas', 'randQrInfo', db.qrcodes[id], 'random');
+  toast('随机多链接二维码生成成功！', 'success');
 }
 
 function createLive() {
-  const content = document.getElementById('liveTargetUrl').value.trim();
-  if (!content) return toast('请输入目标链接', 'error');
-  if (!content.startsWith('http://') && !content.startsWith('https://')) {
-    return toast('请输入以 http:// 或 https:// 开头的链接', 'error');
-  }
-
-  const id = genId();
-  // 活码：数据直接编码在 URL 中，和单链接一样
-  // 但额外在 localStorage 记录 live 标记，方便管理和批量修改
-  const payload = { u: content, live: true };
-  const scanUrl = `${SITE_URL}/#/go/${encodeData(payload)}`;
-
+  const name = document.getElementById('liveName').value.trim();
+  const url = document.getElementById('liveUrl').value.trim();
+  const expireDays = document.getElementById('liveExpire').value;
+  if (!url) return toast('请输入目标 URL', 'error');
   const db = loadDB();
-  db.history.unshift({ id, type: 'live', url: content, scanUrl, createdAt: Date.now() });
-  if (db.history.length > 100) db.history = db.history.slice(0, 100);
+  const id = genId();
+  db.qrcodes[id] = {
+    id, type: 'live', createdAt: Date.now(),
+    expireDays: expireDays ? Number(expireDays) : null,
+    name: name || '未命名活码', url
+  };
   saveDB(db);
-
-  showResult('liveQrCanvas', 'liveQrInfo', scanUrl, { ...payload, id }, 'live');
-  toast('活码生成成功！扫码后直接跳转', 'success');
+  showResult('liveQrCanvas', 'liveQrInfo', db.qrcodes[id], 'live');
+  toast('活码生成成功！', 'success');
 }
 
-// ==================== Hash-based Scan Router ====================
-function handleRoute() {
-  const hash = window.location.hash;
+// ==================== Parse QR ====================
+function parseQR() {
+  const id = document.getElementById('parseId').value.trim();
+  if (!id) return toast('请输入二维码ID', 'error');
+  const db = loadDB();
+  const data = db.qrcodes[id];
+  if (!data) return toast('二维码不存在', 'error');
+  renderParseResult(data);
+}
 
-  // Route: #/go/{encoded_data}
-  if (hash.startsWith('#/go/')) {
-    const encoded = hash.slice(5);
-    const payload = decodeData(encoded);
+function renderParseResult(data) {
+  const el = document.getElementById('parseResult');
+  const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', live: '活码' };
+  const typeClasses = { single: 'type-single', sequential: 'type-sequential', random: 'type-random', live: 'type-live' };
 
-    if (!payload) {
-      showRedirectPage('二维码数据无效', null, true);
-      return;
-    }
-
-    // Single URL redirect
-    if (payload.u) {
-      showRedirectPage('正在跳转...', payload.u);
-      setTimeout(() => { window.location.href = payload.u; }, 1200);
-      return;
-    }
-
-    // Sequential multi-URL
-    if (payload.m === 'seq' && payload.urls && payload.urls.length) {
-      // Use localStorage on scanner's device to track sequence index
-      const key = 'qr_seq_' + encoded;
-      let idx = parseInt(localStorage.getItem(key) || '0', 10);
-      idx = idx % payload.urls.length;
-      localStorage.setItem(key, String(idx + 1));
-      const target = payload.urls[idx];
-      showRedirectPage(`正在跳转 (第 ${idx + 1}/${payload.urls.length} 个)...`, target);
-      setTimeout(() => { window.location.href = target; }, 1500);
-      return;
-    }
-
-    // Random multi-URL
-    if (payload.m === 'rand' && payload.urls && payload.urls.length) {
-      const idx = Math.floor(Math.random() * payload.urls.length);
-      const target = payload.urls[idx];
-      showRedirectPage('正在跳转...', target);
-      setTimeout(() => { window.location.href = target; }, 1200);
-      return;
-    }
-
-    // Text content display
-    if (payload.m === 'text' && payload.t) {
-      showRedirectPage(payload.t, null, false, true);
-      return;
-    }
-
-    showRedirectPage('无法识别的二维码内容', null, true);
-    return;
+  let expired = false;
+  let expireInfo = '永久有效';
+  if (data.expireDays) {
+    const expireMs = data.expireDays * 24 * 60 * 60 * 1000;
+    const remaining = expireMs - (Date.now() - data.createdAt);
+    expired = remaining <= 0;
+    if (expired) expireInfo = '⚠️ 已过期';
+    else expireInfo = `剩余 ${Math.ceil(remaining / 86400000)} 天`;
   }
 
-  // Normal app view
-  document.getElementById('redirectOverlay').style.display = 'none';
-  document.querySelector('.header').style.display = 'flex';
-  document.querySelector('.container').style.display = 'block';
-}
-
-function showRedirectPage(msg, redirectUrl, isError, isContent) {
-  document.getElementById('redirectOverlay').style.display = 'block';
-  document.querySelector('.header').style.display = 'none';
-  document.querySelector('.container').style.display = 'none';
-
-  const content = document.getElementById('redirectContent');
-  if (isError) {
-    content.innerHTML = `<h2 style="color:#e53e3e;margin:0 0 16px">访问失败</h2><p style="color:#666">${escapeHtml(msg)}</p>
-      <div style="margin-top:20px"><a href="${SITE_URL}" style="color:#4a6cf7;font-size:13px;text-decoration:none">返回管理平台</a></div>`;
-  } else if (isContent) {
-    content.innerHTML = `<h3 style="color:#4a6cf7;margin:0 0 16px">二维码内容</h3>
-      <p style="color:#333;font-size:16px;line-height:1.8;word-break:break-all;white-space:pre-wrap">${escapeHtml(msg)}</p>
-      <div style="margin-top:20px"><a href="${SITE_URL}" style="color:#94a3b8;font-size:12px;text-decoration:none">返回管理平台</a></div>`;
+  let contentHtml = '';
+  if (data.type === 'single') {
+    contentHtml = `<div class="info-item"><div class="label">内容</div><div class="value">${escapeHtml(data.content)}</div></div>`;
+  } else if (data.type === 'live') {
+    contentHtml = `<div class="info-item"><div class="label">名称</div><div class="value">${escapeHtml(data.name||'')}</div></div>
+      <div class="info-item" style="grid-column:1/-1"><div class="label">当前目标 URL</div><div class="value"><a href="${escapeHtmlAttr(data.url||'')}" target="_blank" style="color:#4a6cf7">${escapeHtml(data.url||'')}</a></div></div>`;
   } else {
-    content.innerHTML = `
-      <div style="margin-bottom:20px">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4a6cf7" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <h3 style="color:#4a6cf7;margin:0 0 12px">正在跳转...</h3>
-      <p style="color:#666;font-size:13px;word-break:break-all;margin-bottom:16px">${escapeHtml(redirectUrl)}</p>
-      <a href="${escapeHtmlAttr(redirectUrl)}" style="color:#4a6cf7;text-decoration:underline;font-size:14px">如未自动跳转，请点击此处</a>
-      <div style="margin-top:20px"><a href="${SITE_URL}" style="color:#94a3b8;font-size:12px;text-decoration:none">返回管理平台</a></div>`;
+    const urlItems = (data.urls || []).map((u, i) => `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid #f1f5f9;display:flex;gap:8px;align-items:center"><span style="background:#4a6cf7;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${i+1}</span><span style="word-break:break-all">${escapeHtml(u)}</span></div>`).join('');
+    const extra = data.type === 'sequential' ? `<div style="margin-top:8px;font-size:12px;color:#4a6cf7">下次扫码将读取：第 ${(data.currentIndex || 0) + 1} 个链接</div>` : '';
+    contentHtml = `<div class="info-item" style="grid-column:1/-1"><div class="label">链接列表（共 ${data.urls?.length || 0} 个）</div><div>${urlItems}</div>${extra}</div>`;
   }
+
+  el.className = 'scan-info-box show';
+  el.innerHTML = `
+    <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <h3 style="font-size:16px;font-weight:700;color:var(--text)">🔍 二维码信息</h3>
+      <span class="qr-card-type ${typeClasses[data.type]}">${typeLabels[data.type]}</span>
+      <span style="font-size:12px;${expired?'color:#ef4444;font-weight:700':'color:#10b981;font-weight:700'}">${expired ? '⚠️ 已过期' : '✅ 有效'}</span>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">二维码 ID</div><div class="value"><code>${data.id}</code></div></div>
+      <div class="info-item"><div class="label">有效期</div><div class="value ${expired ? 'status-expired' : 'status-valid'}">${expireInfo}</div></div>
+      <div class="info-item"><div class="label">创建时间</div><div class="value">${new Date(data.createdAt).toLocaleString('zh-CN')}</div></div>
+      <div class="info-item"><div class="label">扫码链接</div><div class="value" style="font-size:12px">${SITE_URL}/#/scan/${data.id}</div></div>
+      ${contentHtml}
+    </div>`;
 }
 
 // ==================== List ====================
 function loadList() {
   const db = loadDB();
-  renderList(db.history);
+  const list = Object.values(db.qrcodes).sort((a,b) => b.createdAt - a.createdAt);
+  renderList(list);
 }
 
 async function renderList(list) {
   const c = document.getElementById('qrListContainer');
   if (!list.length) {
-    c.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>还没有创建过二维码</p></div>`;
+    c.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>还没有二维码，去创建一个吧！</p></div>`;
     return;
   }
-
-  const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', text: '文字', live: '活码' };
-  const typeClasses = { single: 'type-single', sequential: 'type-sequential', random: 'type-random', text: 'type-live', live: 'type-live' };
+  const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', live: '活码' };
+  const typeClasses = { single: 'type-single', sequential: 'type-sequential', random: 'type-random', live: 'type-live' };
 
   c.innerHTML = `<div class="qr-list-grid">${(await Promise.all(list.map(async qr => {
-    const scanUrl = qr.scanUrl || `${SITE_URL}/#/go/`;
+    let expireText = '永久有效';
+    let expireColor = '#10b981';
+    if (qr.expireDays) {
+      const expireMs = qr.expireDays * 24 * 60 * 60 * 1000;
+      const remaining = expireMs - (Date.now() - qr.createdAt);
+      if (remaining <= 0) { expireText = '已过期'; expireColor = '#ef4444'; }
+      else expireText = `剩余 ${Math.ceil(remaining/86400000)} 天`;
+    }
+    const contentPreview = qr.type === 'single'
+      ? (qr.content || '').slice(0, 40)
+      : qr.type === 'live'
+      ? (qr.url || '').slice(0, 40)
+      : `${qr.urls?.length || 0} 个链接`;
+
+    // Generate QR thumbnail
+    const scanUrl = `${SITE_URL}/#/scan/${qr.id}`;
     const dataUrl = await generateQRDataURL(scanUrl);
-    let preview = '';
-    if (qr.type === 'single' || qr.type === 'live') preview = (qr.url || '').slice(0, 40);
-    else if (qr.type === 'text') preview = (qr.text || '').slice(0, 40);
-    else preview = `${qr.urls?.length || 0} 个链接`;
 
     return `
       <div class="qr-card">
         <div class="qr-card-header">
-          <span class="qr-card-type ${typeClasses[qr.type] || ''}">${typeLabels[qr.type] || qr.type}</span>
-          <span style="font-size:11px;color:#94a3b8">${new Date(qr.createdAt).toLocaleDateString('zh-CN')}</span>
+          <span class="qr-card-type ${typeClasses[qr.type]}">${typeLabels[qr.type]}</span>
+          <span style="font-size:11px;color:${expireColor};font-weight:700">${expireText}</span>
         </div>
         <div class="qr-card-body">
           <img src="${dataUrl}" class="qr-card-img" alt="QR" />
           <div class="qr-card-meta">
-            <p><strong>内容：</strong>${escapeHtml(preview)}</p>
+            <p><strong>ID：</strong><code style="font-size:11px">${qr.id}</code></p>
+            <p><strong>内容：</strong>${contentPreview}</p>
+            <p><strong>创建：</strong>${new Date(qr.createdAt).toLocaleDateString('zh-CN')}</p>
+            ${qr.type === 'sequential' ? `<p><strong>当前序号：</strong>${(qr.currentIndex||0)+1}</p>` : ''}
           </div>
         </div>
         <div class="qr-card-footer">
-          <button class="btn btn-primary btn-sm" onclick="copyText('${escapeHtmlAttr(scanUrl)}')">复制链接</button>
-          <button class="btn btn-success btn-sm" onclick="regenQR('${escapeHtmlAttr(qr.scanUrl || '')}')">再生成</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteHistory(${qr.id ? "'" + qr.id + "'" : 'null'}, ${qr.createdAt})">删除</button>
+          <button class="btn btn-outline btn-sm" style="color:#4a6cf7;border-color:#4a6cf7" onclick="openView('${qr.id}')">🔍 浏览</button>
+          <button class="btn btn-outline btn-sm" onclick="openEdit('${qr.id}')">✏️ 编辑</button>
+          <button class="btn btn-outline btn-sm" style="color:#7c3aed;border-color:#7c3aed" onclick="viewScan('${qr.id}')">🔗 扫码测试</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteQR('${qr.id}')">🗑️</button>
         </div>
       </div>`;
   }))).join('')}</div>`;
 }
 
-function regenQR(scanUrl) {
-  if (!scanUrl) return toast('无扫码链接', 'error');
-  // Open a new window with the QR code for download
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>二维码</title>
-    <style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f0f4ff;font-family:sans-serif}
-    canvas{border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);margin:20px}
-    p{color:#666;font-size:13px;word-break:break-all;max-width:90%}</style>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script></head><body>
-    <canvas id="qr"></canvas>
-    <p>${escapeHtml(scanUrl)}</p>
-    <script>QRCode.toCanvas(document.getElementById('qr'),'${escapeHtml(scanUrl)}',{width:400,errorCorrectionLevel:'M',margin:1})<\/script></body></html>`;
-  const w = window.open('', '_blank');
-  w.document.write(html);
-  w.document.close();
+// ==================== View Modal ====================
+async function openView(id) {
+  const db = loadDB();
+  const data = db.qrcodes[id];
+  if (!data) return toast('二维码不存在', 'error');
+  renderViewModal(data);
+  document.getElementById('viewModal').classList.add('show');
 }
 
-function deleteHistory(id, createdAt) {
-  if (!confirm('确定删除这条记录？二维码本身仍可使用（数据已编码在链接中）。')) return;
+async function renderViewModal(data) {
+  const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', live: '活码' };
+  const typeClasses = { single: 'type-single', sequential: 'type-sequential', random: 'type-random', live: 'type-live' };
+
+  let expireText = '永久有效';
+  let expireColor = '#10b981';
+  let expired = false;
+  if (data.expireDays) {
+    const ms = data.expireDays * 86400000;
+    const remaining = ms - (Date.now() - data.createdAt);
+    expired = remaining <= 0;
+    expireText = expired ? '⚠️ 已过期' : `剩余 ${Math.ceil(remaining/86400000)} 天`;
+    expireColor = expired ? '#ef4444' : '#10b981';
+  }
+
+  let contentRows = '';
+  if (data.type === 'single') {
+    contentRows = `<tr><td>内容</td><td>${escapeHtml(data.content)}</td></tr>`;
+  } else if (data.type === 'live') {
+    contentRows = `<tr><td>名称</td><td>${escapeHtml(data.name||'')}</td></tr><tr><td>目标 URL</td><td><a href="${escapeHtmlAttr(data.url||'')}" target="_blank" style="color:#4a6cf7">${escapeHtml(data.url||'')}</a></td></tr>`;
+  } else {
+    const urlList = (data.urls||[]).map((u,i)=>`<div style="font-size:12px;padding:3px 0;display:flex;gap:6px;align-items:flex-start"><span style="background:#4a6cf7;color:white;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">${i+1}</span><span style="word-break:break-all">${escapeHtml(u)}</span></div>`).join('');
+    contentRows = `<tr><td>链接</td><td>${urlList}</td></tr>`;
+    if (data.type === 'sequential') contentRows += `<tr><td>下次序号</td><td style="color:#4a6cf7;font-weight:700">第 ${(data.currentIndex||0)+1} 个</td></tr>`;
+  }
+
+  const scanUrl = `${SITE_URL}/#/scan/${data.id}`;
+  const qrDataUrl = await generateQRDataURL(scanUrl);
+
+  document.getElementById('viewModalTitle').textContent = `浏览二维码 — ${typeLabels[data.type]}`;
+  document.getElementById('viewModalBody').innerHTML = `
+    <img src="${qrDataUrl}" class="view-modal-qr" alt="二维码大图" />
+    <table class="view-info-table">
+      <tr><td>ID</td><td><code>${data.id}</code></td></tr>
+      <tr><td>类型</td><td><span class="qr-card-type ${typeClasses[data.type]}">${typeLabels[data.type]}</span>${data.type==='live'?'<span class="live-badge" style="margin-left:8px"><span class="live-dot"></span>LIVE</span>':''}</td></tr>
+      <tr><td>有效期</td><td style="color:${expireColor};font-weight:700">${expireText}</td></tr>
+      <tr><td>创建时间</td><td>${new Date(data.createdAt).toLocaleString('zh-CN')}</td></tr>
+      ${contentRows}
+    </table>
+    <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="copyText('${scanUrl}')">📋 复制扫码链接</button>
+      <button class="btn btn-outline btn-sm" onclick="closeViewModal();openEdit('${data.id}')">✏️ 编辑内容</button>
+      <button class="btn btn-outline btn-sm" style="color:#7c3aed;border-color:#7c3aed" onclick="closeViewModal();viewScan('${data.id}')">🔗 扫码测试</button>
+    </div>`;
+}
+
+function closeViewModal() {
+  document.getElementById('viewModal').classList.remove('show');
+}
+
+// ==================== View Scan (simulates scanning) ====================
+function viewScan(id) {
+  window.location.hash = `#/scan/${id}`;
+}
+
+// ==================== Delete ====================
+function deleteQR(id) {
+  if (!confirm('确定要删除这个二维码吗？删除后无法恢复。')) return;
   const db = loadDB();
-  db.history = db.history.filter(h => h.createdAt !== createdAt);
+  if (!db.qrcodes[id]) return toast('二维码不存在', 'error');
+  delete db.qrcodes[id];
   saveDB(db);
   toast('已删除', 'success');
   loadList();
 }
 
-function clearAll() {
-  if (!confirm('确定清空所有历史记录？这不会影响已生成的二维码。')) return;
-  saveDB({ history: [] });
-  toast('已清空', 'success');
+// ==================== Edit ====================
+function openEdit(id) {
+  const db = loadDB();
+  const data = db.qrcodes[id];
+  if (!data) return toast('二维码不存在', 'error');
+  editingId = id;
+  editUrls = data.urls ? [...data.urls] : [];
+
+  const typeLabels = { single: '单链接', sequential: '顺序多链接', random: '随机多链接', live: '活码' };
+  let body = `<div class="form-group"><label class="form-label">类型</label>
+    <select class="form-input" id="editType" onchange="onEditTypeChange()">
+      <option value="single" ${data.type==='single'?'selected':''}>单链接</option>
+      <option value="sequential" ${data.type==='sequential'?'selected':''}>顺序多链接</option>
+      <option value="random" ${data.type==='random'?'selected':''}>随机多链接</option>
+      <option value="live" ${data.type==='live'?'selected':''}>活码</option>
+    </select></div>`;
+
+  if (data.type === 'single') {
+    body += `<div id="editContentArea" class="form-group"><label class="form-label">内容</label>
+      <input type="text" class="form-input" id="editContent" value="${escapeHtmlAttr(data.content || '')}" /></div>`;
+  } else if (data.type === 'live') {
+    body += `<div id="editContentArea">
+      <div class="form-group"><label class="form-label">活码名称</label>
+        <input type="text" class="form-input" id="editLiveName" value="${escapeHtmlAttr(data.name || '')}" placeholder="备注名称" /></div>
+      <div class="form-group"><label class="form-label">目标 URL（随时可改，二维码不变）</label>
+        <input type="text" class="form-input" id="editLiveUrl" value="${escapeHtmlAttr(data.url || '')}" placeholder="https://example.com" /></div>
+    </div>`;
+  } else {
+    body += `<div id="editContentArea"><div class="form-group">
+      <label class="form-label">链接列表</label>
+      <div class="url-add-row">
+        <input type="text" class="form-input" id="editUrlInput" placeholder="输入新链接..." onkeydown="if(event.key==='Enter'){editUrls.push(document.getElementById('editUrlInput').value.trim());document.getElementById('editUrlInput').value='';renderUrlList('editUrlList',editUrls);}" />
+        <button class="btn btn-success" onclick="editUrls.push(document.getElementById('editUrlInput').value.trim());document.getElementById('editUrlInput').value='';renderUrlList('editUrlList',editUrls)">+ 添加</button>
+      </div>
+      <ul class="url-list" id="editUrlList" style="margin-top:10px"></ul>
+    </div></div>`;
+  }
+
+  body += `<div class="form-group"><label class="form-label">有效天数（可选）</label>
+    <input type="number" class="form-input" id="editExpire" value="${data.expireDays || ''}" placeholder="留空为永久有效" /></div>`;
+
+  document.getElementById('editModalBody').innerHTML = body;
+  if (data.type === 'sequential' || data.type === 'random') renderUrlList('editUrlList', editUrls);
+  document.getElementById('editModal').classList.add('show');
+}
+
+function onEditTypeChange() {
+  const type = document.getElementById('editType').value;
+  const area = document.getElementById('editContentArea');
+  if (type === 'single') {
+    area.innerHTML = `<div class="form-group"><label class="form-label">内容</label>
+      <input type="text" class="form-input" id="editContent" placeholder="URL 或 文字内容" /></div>`;
+  } else if (type === 'live') {
+    area.innerHTML = `<div class="form-group"><label class="form-label">活码名称</label>
+      <input type="text" class="form-input" id="editLiveName" placeholder="备注名称" /></div>
+      <div class="form-group"><label class="form-label">目标 URL</label>
+      <input type="text" class="form-input" id="editLiveUrl" placeholder="https://example.com" /></div>`;
+  } else {
+    area.innerHTML = `<div class="form-group"><label class="form-label">链接列表</label>
+      <div class="url-add-row">
+        <input type="text" class="form-input" id="editUrlInput" placeholder="输入新链接..." />
+        <button class="btn btn-success" onclick="editUrls.push(document.getElementById('editUrlInput').value.trim());document.getElementById('editUrlInput').value='';renderUrlList('editUrlList',editUrls)">+ 添加</button>
+      </div>
+      <ul class="url-list" id="editUrlList" style="margin-top:10px"></ul>
+    </div>`;
+    renderUrlList('editUrlList', editUrls);
+  }
+}
+
+function saveEdit() {
+  const type = document.getElementById('editType').value;
+  const expireDays = document.getElementById('editExpire').value;
+  const db = loadDB();
+  const record = db.qrcodes[editingId];
+  if (!record) return toast('二维码不存在', 'error');
+
+  record.type = type;
+  record.expireDays = expireDays ? Number(expireDays) : null;
+
+  if (type === 'single') {
+    const content = document.getElementById('editContent').value.trim();
+    if (!content) return toast('内容不能为空', 'error');
+    record.content = content;
+    delete record.urls; delete record.url; delete record.name;
+  } else if (type === 'live') {
+    const url = document.getElementById('editLiveUrl').value.trim();
+    if (!url) return toast('目标 URL 不能为空', 'error');
+    record.url = url;
+    record.name = document.getElementById('editLiveName').value.trim() || '未命名活码';
+    delete record.content; delete record.urls;
+  } else {
+    if (!editUrls.length) return toast('请添加至少一个链接', 'error');
+    record.urls = [...editUrls];
+    record.currentIndex = 0;
+    delete record.content; delete record.url; delete record.name;
+  }
+
+  db.qrcodes[editingId] = record;
+  saveDB(db);
+  toast('保存成功！', 'success');
+  closeModal();
   loadList();
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('show');
+  editingId = null;
+  editUrls = [];
 }
 
 // ==================== Export / Import ====================
@@ -1063,14 +1293,12 @@ function importData(event) {
   reader.onload = (e) => {
     try {
       const imported = JSON.parse(e.target.result);
-      if (!imported.history && !imported.qrcodes) throw new Error('Invalid format');
+      if (!imported.qrcodes) throw new Error('Invalid format');
+      if (!confirm(`导入将合并 ${Object.keys(imported.qrcodes).length} 个二维码数据，是否继续？`)) return;
       const db = loadDB();
-      const items = imported.history || Object.values(imported.qrcodes || {});
-      if (!confirm(`导入 ${items.length} 条记录，是否继续？`)) return;
-      db.history = [...items, ...db.history];
-      if (db.history.length > 200) db.history = db.history.slice(0, 200);
+      Object.assign(db.qrcodes, imported.qrcodes);
       saveDB(db);
-      toast('导入成功！', 'success');
+      toast('数据导入成功！', 'success');
       loadList();
     } catch (err) {
       toast('导入失败：文件格式无效', 'error');
@@ -1080,9 +1308,84 @@ function importData(event) {
   event.target.value = '';
 }
 
-// ==================== View Modal ====================
-function closeViewModal() {
-  document.getElementById('viewModal').classList.remove('show');
+// ==================== Hash-based Scan Router ====================
+function handleRoute() {
+  const hash = window.location.hash;
+
+  if (hash.startsWith('#/scan/')) {
+    const id = hash.replace('#/scan/', '');
+    const db = loadDB();
+    const record = db.qrcodes[id];
+
+    if (!record) {
+      showRedirectPage('二维码不存在或已删除', null, true);
+      return;
+    }
+
+    if (record.expireDays) {
+      const expireMs = record.expireDays * 24 * 60 * 60 * 1000;
+      if (Date.now() - record.createdAt > expireMs) {
+        showRedirectPage('二维码已过期', null, true);
+        return;
+      }
+    }
+
+    let target = '';
+    if (record.type === 'live') {
+      target = record.url;
+    } else if (record.type === 'single') {
+      target = record.content;
+    } else if (record.type === 'sequential') {
+      const urls = record.urls;
+      const idx = record.currentIndex % urls.length;
+      record.currentIndex = (idx + 1) % urls.length;
+      db.qrcodes[record.id] = record;
+      saveDB(db);
+      target = urls[idx];
+    } else if (record.type === 'random') {
+      const urls = record.urls;
+      target = urls[Math.floor(Math.random() * urls.length)];
+    }
+
+    if (!target) {
+      showRedirectPage('未设置目标内容', null, true);
+      return;
+    }
+
+    if (target.startsWith('http://') || target.startsWith('https://')) {
+      showRedirectPage('正在跳转...', target);
+      setTimeout(() => { window.location.href = target; }, 1500);
+    } else {
+      showRedirectPage(target, null, false, true);
+    }
+  } else {
+    // Normal app view - hide redirect overlay
+    document.getElementById('redirectOverlay').style.display = 'none';
+    document.querySelector('.header').style.display = 'flex';
+    document.querySelector('.container').style.display = 'block';
+  }
+}
+
+function showRedirectPage(msg, redirectUrl, isError = false, isContent = false) {
+  document.getElementById('redirectOverlay').style.display = 'block';
+  document.querySelector('.header').style.display = 'none';
+  document.querySelector('.container').style.display = 'none';
+
+  const content = document.getElementById('redirectContent');
+  if (isError) {
+    content.innerHTML = `<h2 style="color:#e53e3e;margin:0 0 16px">⚠️ 访问失败</h2><p style="color:#666">${escapeHtml(msg)}</p>`;
+  } else if (isContent) {
+    content.innerHTML = `<h3 style="color:#4a6cf7;margin:0 0 16px">📋 二维码内容</h3><p style="color:#333;font-size:16px;line-height:1.8;word-break:break-all">${escapeHtml(msg)}</p>`;
+  } else {
+    content.innerHTML = `
+      <div style="margin-bottom:20px">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4a6cf7" stroke-width="2" style="animation:pulse 1s infinite"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3 style="color:#4a6cf7;margin:0 0 12px">正在跳转...</h3>
+      <p style="color:#666;font-size:13px;word-break:break-all;margin-bottom:16px">${escapeHtml(redirectUrl)}</p>
+      <a href="${escapeHtmlAttr(redirectUrl)}" style="color:#4a6cf7;text-decoration:underline;font-size:14px">如未自动跳转，请点击此处</a>
+      <div style="margin-top:20px"><a href="${SITE_URL}" style="color:#94a3b8;font-size:12px;text-decoration:none">← 返回管理平台</a></div>`;
+  }
 }
 
 // ==================== Helpers ====================
@@ -1092,6 +1395,10 @@ function escapeHtml(s) {
 function escapeHtmlAttr(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+
+// Close modals on overlay click
+document.getElementById('editModal').addEventListener('click', e => { if (e.target === document.getElementById('editModal')) closeModal(); });
+document.getElementById('viewModal').addEventListener('click', e => { if (e.target === document.getElementById('viewModal')) closeViewModal(); });
 
 // ==================== Init ====================
 window.addEventListener('hashchange', handleRoute);
