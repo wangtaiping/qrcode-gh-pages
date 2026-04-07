@@ -893,8 +893,8 @@ function loadDB() {
 }
 
 function saveDB(db) {
+  const data = { qrcodes: db.qrcodes || {} };
   try {
-    const data = { qrcodes: db.qrcodes || {} };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch { /* quota exceeded */ }
   // 异步尝试推送到 GitHub
