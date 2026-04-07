@@ -502,6 +502,99 @@
       margin-bottom: 20px;
     }
     .data-note strong { color: #b45309; }
+
+    /* ===== Auth Page ===== */
+    .auth-page {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      background: linear-gradient(135deg, #4a6cf7 0%, #7c3aed 100%);
+      justify-content: center;
+      align-items: center;
+    }
+    .auth-page.show { display: flex; }
+    .auth-card {
+      background: white;
+      border-radius: 18px;
+      padding: 40px 36px;
+      width: 380px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,.15);
+      text-align: center;
+    }
+    .auth-card h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      color: #1e293b;
+    }
+    .auth-card p.subtitle {
+      margin: 0 0 28px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .auth-card .form-group { margin-bottom: 18px; text-align: left; }
+    .auth-card .form-label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .auth-card .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .auth-card .form-input:focus { border-color: #4a6cf7; }
+    .auth-card .btn { width: 100%; padding: 13px; font-size: 15px; border-radius: 10px; margin-top: 4px; }
+    .auth-card .auth-switch {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .auth-card .auth-switch a {
+      color: #4a6cf7;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .auth-card .auth-error {
+      color: #ef4444;
+      font-size: 13px;
+      margin-bottom: 12px;
+      min-height: 20px;
+    }
+    .auth-logo {
+      width: 56px; height: 56px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #4a6cf7, #7c3aed);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+    }
+    /* ===== Header User ===== */
+    .header-user {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 4px 14px 4px 10px;
+      color: white;
+      font-size: 13px;
+      cursor: default;
+    }
+    .header-user .user-avatar {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .header-user .logout-btn {
+      background: none; border: none; color: rgba(255,255,255,0.7);
+      cursor: pointer; font-size: 12px; padding: 2px 6px;
+      border-radius: 4px; margin-left: 4px;
+    }
+    .header-user .logout-btn:hover { background: rgba(255,255,255,0.15); color: white; }
   </style>
 </head>
 <body>
@@ -520,10 +613,66 @@
     <button class="nav-btn active" onclick="switchTab('create')">创建</button>
     <button class="nav-btn" onclick="switchTab('manage')">管理</button>
   </div>
+  <div class="header-user" id="headerUser" style="display:none">
+    <span class="user-avatar" id="userAvatar"></span>
+    <span id="userName"></span>
+    <button class="logout-btn" onclick="logoutUser()">退出</button>
+  </div>
 </header>
 
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- Auth Page -->
+<div class="auth-page" id="authPage">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <circle cx="17.5" cy="17.5" r="2.5" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <h2>登录</h2>
+      <p class="subtitle">登录后管理你的二维码</p>
+      <div class="auth-error" id="loginError"></div>
+      <div class="form-group">
+        <label class="form-label">用户名</label>
+        <input type="text" class="form-input" id="loginUsername" placeholder="输入用户名" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">密码</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="输入密码" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">登 录</button>
+      <div class="auth-switch">还没有账号？<a onclick="showRegister()">立即注册</a></div>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerForm" style="display:none">
+      <h2>注册</h2>
+      <p class="subtitle">创建账号开始使用</p>
+      <div class="auth-error" id="registerError"></div>
+      <div class="form-group">
+        <label class="form-label">用户名</label>
+        <input type="text" class="form-input" id="regUsername" placeholder="至少3个字符" onkeydown="if(event.key==='Enter')doRegister()" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">密码</label>
+        <input type="password" class="form-input" id="regPassword" placeholder="至少6位" onkeydown="if(event.key==='Enter')doRegister()" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">确认密码</label>
+        <input type="password" class="form-input" id="regPassword2" placeholder="再次输入密码" onkeydown="if(event.key==='Enter')doRegister()" />
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">注 册</button>
+      <div class="auth-switch">已有账号？<a onclick="showLogin()">去登录</a></div>
+    </div>
+  </div>
+</div>
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="editModal">
@@ -552,7 +701,7 @@
 
   <!-- Data note -->
   <div class="data-note">
-    <strong>数据存储说明：</strong>所有二维码数据保存在浏览器本地（localStorage），清除浏览器数据会导致丢失。建议定期导出备份。
+    <strong>数据存储说明：</strong>二维码数据按用户隔离保存在浏览器本地，清除浏览器数据会导致丢失。建议定期导出备份。
     <span id="exportBtn" style="float:right;cursor:pointer;color:#4a6cf7;font-weight:700" onclick="exportData()">导出数据</span>
     <span id="importBtn" style="float:right;cursor:pointer;color:#7c3aed;font-weight:700;margin-right:16px" onclick="document.getElementById('importFile').click()">导入数据</span>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
@@ -773,6 +922,8 @@
 // ==================== Constants ====================
 const SITE_URL = 'https://lattafar.com';
 const STORAGE_KEY = 'qrcode_app_data';
+const USERS_KEY = 'qrcode_app_users';  // 用户账号数据库
+const SESSION_KEY = 'qrcode_app_session';  // 当前登录会话
 // 远程数据读取地址（公开，无需 token）
 const GITHUB_RAW = 'https://raw.githubusercontent.com/wangtaiping/qrcode-gh-pages/main/data/qrcodes.json';
 const GITHUB_API_URL = 'https://api.github.com/repos/wangtaiping/qrcode-gh-pages/contents/data/qrcodes.json';
@@ -783,6 +934,126 @@ const randUrls = [];
 let editingId = null;
 let editUrls = [];
 let remoteDB = null;
+let currentUser = null;  // 当前登录用户名
+
+// ==================== Auth System (pure frontend) ====================
+// 简单的哈希函数（用于密码存储，非安全级别但够用）
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return 'h_' + Math.abs(hash).toString(36);
+}
+
+function getUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function doRegister() {
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const password2 = document.getElementById('regPassword2').value;
+  const errEl = document.getElementById('registerError');
+  errEl.textContent = '';
+
+  if (username.length < 2) { errEl.textContent = '用户名至少2个字符'; return; }
+  if (password.length < 4) { errEl.textContent = '密码至少4位'; return; }
+  if (password !== password2) { errEl.textContent = '两次密码不一致'; return; }
+
+  const users = getUsers();
+  if (users[username]) { errEl.textContent = '用户名已存在'; return; }
+
+  users[username] = { passwordHash: simpleHash(password), createdAt: Date.now() };
+  saveUsers(users);
+
+  // 自动登录
+  loginAs(username);
+  toast('注册成功！', 'success');
+}
+
+function doLogin() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+
+  if (!username) { errEl.textContent = '请输入用户名'; return; }
+  if (!password) { errEl.textContent = '请输入密码'; return; }
+
+  const users = getUsers();
+  const user = users[username];
+  if (!user) { errEl.textContent = '用户不存在'; return; }
+  if (user.passwordHash !== simpleHash(password)) { errEl.textContent = '密码错误'; return; }
+
+  loginAs(username);
+  toast('登录成功！', 'success');
+}
+
+function loginAs(username) {
+  currentUser = username;
+  localStorage.setItem(SESSION_KEY, username);
+  document.getElementById('authPage').classList.remove('show');
+  updateUserUI();
+}
+
+function logoutUser() {
+  currentUser = null;
+  localStorage.removeItem(SESSION_KEY);
+  updateUserUI();
+  showAuthPage();
+}
+
+function checkSession() {
+  const session = localStorage.getItem(SESSION_KEY);
+  const users = getUsers();
+  if (session && users[session]) {
+    currentUser = session;
+    updateUserUI();
+    return true;
+  }
+  showAuthPage();
+  return false;
+}
+
+function showAuthPage() {
+  document.getElementById('authPage').classList.add('show');
+  document.querySelector('.header').style.display = 'none';
+  document.querySelector('.container').style.display = 'none';
+}
+
+function updateUserUI() {
+  if (currentUser) {
+    document.getElementById('authPage').classList.remove('show');
+    document.querySelector('.header').style.display = 'flex';
+    document.querySelector('.container').style.display = 'block';
+    document.getElementById('headerUser').style.display = 'flex';
+    document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
+    document.getElementById('userName').textContent = currentUser;
+  } else {
+    document.getElementById('headerUser').style.display = 'none';
+  }
+}
+
+function showRegister() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'block';
+  document.getElementById('registerError').textContent = '';
+}
+function showLogin() {
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('loginError').textContent = '';
+}
 
 // ==================== Remote Data Layer (GitHub) ====================
 // 从 GitHub 读取远程数据（公开读，无需 token）
@@ -865,10 +1136,14 @@ function decodeDataFromUrl(encoded) {
   } catch { return null; }
 }
 
-// ==================== Data Layer (localStorage + URL encoding) ====================
+// ==================== Data Layer (localStorage per user) ====================
+function getUserStorageKey() {
+  return currentUser ? `${STORAGE_KEY}_${currentUser}` : STORAGE_KEY;
+}
+
 function loadDB() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getUserStorageKey());
     if (!raw) return { qrcodes: {} };
     const data = JSON.parse(raw);
     if (data.history && !data.qrcodes) {
@@ -895,7 +1170,7 @@ function loadDB() {
 function saveDB(db) {
   const data = { qrcodes: db.qrcodes || {} };
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(getUserStorageKey(), JSON.stringify(data));
   } catch { /* quota exceeded */ }
   // 异步尝试推送到 GitHub
   pushToGitHub(data);
@@ -1645,10 +1920,17 @@ document.getElementById('viewModal').addEventListener('click', e => { if (e.targ
 // ==================== Init ====================
 window.addEventListener('hashchange', handleRoute);
 window.addEventListener('load', () => {
-  handleRoute();
-  // 非扫码页面时，从远程同步数据到本地
-  if (!window.location.hash.startsWith('#/scan/')) {
-    syncFromRemote();
+  // 先检查登录态（扫码页面除外）
+  if (window.location.hash.startsWith('#/s/') || window.location.hash.startsWith('#/scan/')) {
+    handleRoute();
+    return;
+  }
+  const loggedIn = checkSession();
+  if (loggedIn) {
+    handleRoute();
+    if (!window.location.hash.startsWith('#/scan/')) {
+      syncFromRemote();
+    }
   }
 });
 
