@@ -1594,7 +1594,25 @@ function renderParseResult(data) {
 }
 
 // ==================== List ====================
-function loadList() {
+async function loadList() {
+  // 先从远程同步一次，确保拿到最新数据
+  try {
+    const remote = await fetchRemoteDB();
+    if (remote && remote.qrcodes) {
+      const localDB = loadDB();
+      let changed = false;
+      for (const [id, record] of Object.entries(remote.qrcodes)) {
+        if (!localDB.qrcodes[id] || (record.createdAt > localDB.qrcodes[id].createdAt)) {
+          localDB.qrcodes[id] = record;
+          changed = true;
+        }
+      }
+      if (changed) {
+        localStorage.setItem(getUserStorageKey(), JSON.stringify({ qrcodes: localDB.qrcodes }));
+      }
+    }
+  } catch (e) { console.log('loadList sync failed:', e); }
+
   const db = loadDB();
   const list = Object.values(db.qrcodes).sort((a,b) => b.createdAt - a.createdAt);
   renderList(list);
@@ -2066,7 +2084,11 @@ async function syncFromRemote() {
         localStorage.setItem(getUserStorageKey(), JSON.stringify({ qrcodes: localDB.qrcodes }));
       } catch {}
       console.log('Synced from GitHub:', Object.keys(data.qrcodes).length, 'records');
-      toast('已从云端同步 ' + Object.keys(data.qrcodes).length + ' 条数据', 'info');
+      // 如果管理面板可见，立即刷新列表
+      if (document.getElementById('managePanel').style.display !== 'none') {
+        const list = Object.values(localDB.qrcodes).sort((a,b) => b.createdAt - a.createdAt);
+        renderList(list);
+      }
     }
   } catch (e) {
     console.log('Sync from remote failed:', e);
