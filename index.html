@@ -928,11 +928,8 @@ const GITHUB_REPO = 'wangtaiping/qrcode-gh-pages';
 const GITHUB_BRANCH = 'main';
 const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/' + GITHUB_BRANCH + '/data';
 const GITHUB_API_BASE = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/data';
-// CORS 代理列表
-const CORS_PROXIES = [
-  url => 'https://corsproxy.io/?' + encodeURIComponent(url),
-  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)
-];
+// GitHub Actions 作为写入中转（PAT 存在 repo secret 中，不暴露在前端）
+const WORKFLOW_DISPATCH_URL = 'https://api.github.com/repos/' + GITHUB_REPO + '/actions/workflows/gh-api-proxy.yml/dispatches';
 
 // ==================== State ====================
 const seqUrls = [];
@@ -944,26 +941,7 @@ let currentUser = null;  // 当前登录用户名
 let cachedUsers = null;  // 缓存远程用户列表
 
 // ==================== GitHub API Helpers ====================
-// 通过 CORS 代理请求 GitHub API
-async function githubFetch(url, options = {}) {
-  for (const proxyFn of CORS_PROXIES) {
-    try {
-      const proxyUrl = proxyFn(url);
-      const res = await fetch(proxyUrl, options);
-      if (res.ok) return await res.json();
-    } catch (e) {
-      console.log('CORS proxy failed:', e.message);
-    }
-  }
-  // 直接尝试（同源时可用）
-  try {
-    const res = await fetch(url, options);
-    if (res.ok) return await res.json();
-  } catch {}
-  return null;
-}
-
-// 获取 GitHub 文件内容
+// 获取 GitHub 文件内容（直接读 raw，无需认证）
 async function githubGetFile(path) {
   const url = GITHUB_RAW_BASE + '/' + path + '?t=' + Date.now();
   try {
@@ -976,7 +954,26 @@ async function githubGetFile(path) {
   return null;
 }
 
-// 保存文件到 GitHub
+// 通过 GitHub API 获取文件信息（含 SHA）
+async function githubGetFileMeta(path) {
+  const url = GITHUB_API_BASE + '/' + path;
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'Authorization': 'token ' + GITHUB_PAT,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'qrcode-app'
+      }
+    });
+    if (res.ok) return await res.json();
+    if (res.status === 404) return null;
+  } catch (e) {
+    console.log('githubGetFileMeta failed:', e.message);
+  }
+  return null;
+}
+
+// 保存文件到 GitHub（直接用 PAT 调 API，GitHub 支持跨域）
 async function githubSaveFile(path, content, message) {
   const apiUrl = GITHUB_API_BASE + '/' + path;
   const jsonStr = JSON.stringify(content, null, 2);
@@ -984,16 +981,8 @@ async function githubSaveFile(path, content, message) {
 
   // 先获取当前 SHA
   let sha = null;
-  for (const proxyFn of CORS_PROXIES) {
-    try {
-      const proxyUrl = proxyFn(apiUrl);
-      const res = await fetch(proxyUrl);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.sha) { sha = data.sha; break; }
-      }
-    } catch {}
-  }
+  const meta = await githubGetFileMeta(path);
+  if (meta && meta.sha) sha = meta.sha;
 
   const body = {
     message: message || 'update: ' + path + ' ' + new Date().toISOString().slice(0,16),
@@ -1002,21 +991,26 @@ async function githubSaveFile(path, content, message) {
   };
   if (sha) body.sha = sha;
 
-  for (const proxyFn of CORS_PROXIES) {
-    try {
-      const proxyUrl = proxyFn(apiUrl);
-      const res = await fetch(proxyUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (res.ok) {
-        const result = await res.json();
-        return result;
-      }
-    } catch (e) {
-      console.log('Save proxy failed:', e.message);
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + GITHUB_PAT,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'qrcode-app'
+      },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      const result = await res.json();
+      console.log('githubSaveFile success:', path, result.commit ? result.commit.sha.slice(0,7) : 'ok');
+      return result;
     }
+    const errData = await res.json().catch(() => ({}));
+    console.error('githubSaveFile failed:', res.status, errData.message);
+  } catch (e) {
+    console.error('githubSaveFile error:', e.message);
   }
   return null;
 }
