@@ -1967,8 +1967,24 @@ function processScan(record, db) {
   }
 
   if (target.startsWith('http://') || target.startsWith('https://')) {
-    showRedirectPage('正在跳转...', target);
-    setTimeout(() => { window.location.href = target; }, 100);
+    // 微信浏览器中 window.location.href 会被拦截弹出中间页
+    // 用隐藏 <a> 标签 + .click() 跳转，比 location.href 更不容易被微信拦截
+    // 同时保留极简兜底提示（万一跳转失败用户不会看到空白页）
+    const overlay = document.getElementById('redirectOverlay');
+    const content = document.getElementById('redirectContent');
+    overlay.style.display = 'block';
+    document.querySelector('.header').style.display = 'none';
+    document.querySelector('.container').style.display = 'none';
+    content.innerHTML = `
+      <p style="color:#94a3b8;font-size:14px;margin:0 0 16px">正在打开链接...</p>
+      <a href="${escapeHtmlAttr(target)}" style="color:#4a6cf7;text-decoration:underline;font-size:14px">如未自动跳转，请点击此处</a>
+      <div style="margin-top:16px"><a href="${SITE_URL}" style="color:#94a3b8;font-size:12px;text-decoration:none">← 返回管理平台</a></div>`;
+    // 用隐藏 a 标签触发跳转
+    const a = document.createElement('a');
+    a.href = target;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
   } else {
     showRedirectPage(target, null, false, true);
   }
