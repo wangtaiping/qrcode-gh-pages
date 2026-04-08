@@ -1,3 +1,11 @@
 {
-  "qrcodes": {}
+  "qrcodes": {
+    "278dccbbfe71": {
+      "id": "278dccbbfe71",
+      "type": "single",
+      "createdAt": 1775613040138,
+      "expireDays": null,
+      "content": "https://lattafa.com/"
+    }
+  }
 }
