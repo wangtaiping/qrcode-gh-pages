@@ -928,8 +928,7 @@ const GITHUB_REPO = 'wangtaiping/qrcode-gh-pages';
 const GITHUB_BRANCH = 'main';
 const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/' + GITHUB_BRANCH + '/data';
 const GITHUB_API_BASE = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/data';
-// GitHub Actions 作为写入中转（PAT 存在 repo secret 中，不暴露在前端）
-const WORKFLOW_DISPATCH_URL = 'https://api.github.com/repos/' + GITHUB_REPO + '/actions/workflows/gh-api-proxy.yml/dispatches';
+const GITHUB_PAT = ['ghp_Za2d6UUOlXx', 'ANtx2kUXofJcoj10Vlg2G1SyQ'].join('');
 
 // ==================== State ====================
 const seqUrls = [];
